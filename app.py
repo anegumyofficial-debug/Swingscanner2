@@ -22,8 +22,6 @@ def fetch_and_analyze(ticker, timeframe_label):
     }
     
     conf = config[timeframe_label]
-    
-    # Ambil data dengan penanganan khusus pasar tutup
     df = yf.download(ticker, period=conf['period'], interval=conf['interval'], progress=False, auto_adjust=True)
     
     if df is None or df.empty:
@@ -32,7 +30,6 @@ def fetch_and_analyze(ticker, timeframe_label):
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
-    # Hitung Indikator
     df['RSI'] = ta.rsi(df['Close'], length=14)
     bbands = ta.bbands(df['Close'], length=20, std=2)
     
@@ -40,13 +37,9 @@ def fetch_and_analyze(ticker, timeframe_label):
         return None
         
     df = pd.concat([df, bbands], axis=1).dropna()
-    
-    if df.empty:
-        return None
+    if df.empty: return None
         
     latest = df.iloc[-1]
-    
-    # Deteksi kolom Bollinger secara otomatis
     col_bbl = [c for c in df.columns if 'BBL' in c]
     col_bbu = [c for c in df.columns if 'BBU' in c]
     
@@ -55,7 +48,6 @@ def fetch_and_analyze(ticker, timeframe_label):
     l_band = float(latest[col_bbl])
     u_band = float(latest[col_bbu])
 
-    # Penentuan Sinyal
     if rsi_val <= conf['rsi_low'] or curr_price <= l_band:
         status, entry = "🟢 SIAP SEROK", curr_price
         tp = round(curr_price * (1 + conf['tp']), 0)
@@ -69,7 +61,7 @@ def fetch_and_analyze(ticker, timeframe_label):
 
     return {
         "Saham": ticker.replace(".JK", ""),
-        "Harga Terakhir": round(curr_price, 0),
+        "Harga": round(curr_price, 0),
         "Status": status,
         "Harga Serok": entry,
         "Target Jual": tp,
@@ -77,8 +69,13 @@ def fetch_and_analyze(ticker, timeframe_label):
         "RSI": round(rsi_val, 2)
     }
 
-# 4. TAMPILAN DASHBOARD
+# 4. TAMPILAN DASHBOARD DENGAN WARNA
 tab1, tab2, tab3 = st.tabs(["🕒 Day Scalping", "📅 Weekly Swing", "🏛️ Monthly Invest"])
+
+def color_df(val):
+    if "SIAP SEROK" in str(val): return 'background-color: #d4edda; color: #155724; font-weight: bold'
+    if "JUAL" in str(val): return 'background-color: #f8d7da; color: #721c24; font-weight: bold'
+    return ''
 
 def display_content(tab, label):
     with tab:
@@ -87,13 +84,14 @@ def display_content(tab, label):
             try:
                 res = fetch_and_analyze(t, label)
                 if res: all_data.append(res)
-            except:
-                continue
+            except: continue
         
         if all_data:
-            st.table(pd.DataFrame(all_data))
+            df_final = pd.DataFrame(all_data)
+            # Menerapkan pewarnaan pada tabel
+            st.dataframe(df_final.style.applymap(color_df, subset=['Status']), use_container_width=True)
         else:
-            st.info(f"Sistem sedang mencari data historis terdekat untuk {label}...")
+            st.info(f"Mencari data historis untuk {label}...")
 
 display_content(tab1, "Day (Scalping)")
 display_content(tab2, "Weekly (Swing)")
