@@ -23,37 +23,31 @@ def fetch_and_analyze(ticker, timeframe_label):
     
     conf = config[timeframe_label]
     
-    # Ambil data
-    df = yf.download(ticker, period=conf['period'], interval=conf['interval'], progress=False)
+    # Ambil data - Menggunakan auto_adjust=True agar kolom lebih konsisten
+    df = yf.download(ticker, period=conf['period'], interval=conf['interval'], progress=False, auto_adjust=True)
     
-    if df.empty:
+    if df is None or df.empty:
         return None
         
-    # PERBAIKAN UTAMA: Meratakan Multi-Index kolom dari Yahoo Finance
+    # Meratakan Multi-Index jika ada
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
-    # Hitung Indikator RSI
+    # Hitung Indikator
     df['RSI'] = ta.rsi(df['Close'], length=14)
-    
-    # Hitung Bollinger Bands
     bbands = ta.bbands(df['Close'], length=20, std=2)
     
     if bbands is None or bbands.empty:
         return None
         
-    # Gabungkan data
-    df = pd.concat([df, bbands], axis=1)
+    df = pd.concat([df, bbands], axis=1).dropna()
     
-    # Ambil baris terakhir yang tidak kosong
-    df = df.dropna()
     if df.empty:
         return None
         
     latest = df.iloc[-1]
     
-    # Mengambil nilai dengan cara yang lebih aman (mencari nama kolom yang mengandung BBL/BBU)
-    # Ini untuk menghindari error jika nama kolom berubah sedikit
+    # Deteksi kolom Bollinger secara otomatis
     col_bbl = [c for c in df.columns if 'BBL' in c]
     col_bbu = [c for c in df.columns if 'BBU' in c]
     
@@ -76,7 +70,7 @@ def fetch_and_analyze(ticker, timeframe_label):
 
     return {
         "Saham": ticker.replace(".JK", ""),
-        "Harga": round(curr_price, 0),
+        "Harga Terakhir": round(curr_price, 0),
         "Status": status,
         "Harga Serok": entry,
         "Target Jual": tp,
@@ -94,10 +88,13 @@ def display_content(tab, label):
             try:
                 res = fetch_and_analyze(t, label)
                 if res: all_data.append(res)
-            except Exception:
+            except:
                 continue
+        
         if all_data:
             st.table(pd.DataFrame(all_data))
+        else:
+            st.warning(f"Data {label} belum tersedia (Pasar mungkin sedang tutup). Coba cek tab Weekly atau Monthly.")
 
 display_content(tab1, "Day (Scalping)")
 display_content(tab2, "Weekly (Swing)")
