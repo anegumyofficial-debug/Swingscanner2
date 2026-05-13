@@ -22,32 +22,45 @@ def fetch_and_analyze(ticker, timeframe_label):
     }
     
     conf = config[timeframe_label]
-    # Ambil data dan pastikan format kolom sederhana (Satu Level)
+    
+    # Ambil data
     df = yf.download(ticker, period=conf['period'], interval=conf['interval'], progress=False)
     
     if df.empty:
         return None
         
-    # Perbaikan: Meratakan kolom jika ada Multi-Index dari Yahoo Finance
+    # PERBAIKAN UTAMA: Meratakan Multi-Index kolom dari Yahoo Finance
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
-    # Hitung Indikator
+    # Hitung Indikator RSI
     df['RSI'] = ta.rsi(df['Close'], length=14)
+    
+    # Hitung Bollinger Bands
     bbands = ta.bbands(df['Close'], length=20, std=2)
     
-    # Pastikan BBands berhasil dihitung
     if bbands is None or bbands.empty:
         return None
         
+    # Gabungkan data
     df = pd.concat([df, bbands], axis=1)
     
+    # Ambil baris terakhir yang tidak kosong
+    df = df.dropna()
+    if df.empty:
+        return None
+        
     latest = df.iloc[-1]
+    
+    # Mengambil nilai dengan cara yang lebih aman (mencari nama kolom yang mengandung BBL/BBU)
+    # Ini untuk menghindari error jika nama kolom berubah sedikit
+    col_bbl = [c for c in df.columns if 'BBL' in c]
+    col_bbu = [c for c in df.columns if 'BBU' in c]
+    
     curr_price = float(latest['Close'])
     rsi_val = float(latest['RSI'])
-    # Menggunakan nama kolom BBands yang standar dari pandas_ta
-    l_band = float(latest['BBL_20_2.0'])
-    u_band = float(latest['BBU_20_2.0'])
+    l_band = float(latest[col_bbl])
+    u_band = float(latest[col_bbu])
 
     # Penentuan Sinyal
     if rsi_val <= conf['rsi_low'] or curr_price <= l_band:
@@ -78,8 +91,11 @@ def display_content(tab, label):
     with tab:
         all_data = []
         for t in tickers:
-            res = fetch_and_analyze(t, label)
-            if res: all_data.append(res)
+            try:
+                res = fetch_and_analyze(t, label)
+                if res: all_data.append(res)
+            except Exception:
+                continue
         if all_data:
             st.table(pd.DataFrame(all_data))
 
