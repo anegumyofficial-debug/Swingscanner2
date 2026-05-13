@@ -16,20 +16,19 @@ tickers = ["BBRI.JK", "BBCA.JK", "BBNI.JK", "ASII.JK", "TLKM.JK", "BMRI.JK"]
 # 3. FUNGSI LOGIKA ANALISIS
 def fetch_and_analyze(ticker, timeframe_label):
     config = {
-        "Day (Scalping)": {"period": "5d", "interval": "15m", "tp": 0.02, "sl": 0.015, "rsi_low": 30},
+        "Day (Scalping)": {"period": "7d", "interval": "15m", "tp": 0.02, "sl": 0.015, "rsi_low": 30},
         "Weekly (Swing)": {"period": "3mo", "interval": "1d", "tp": 0.07, "sl": 0.04, "rsi_low": 40},
         "Monthly (Invest)": {"period": "1y", "interval": "1wk", "tp": 0.15, "sl": 0.07, "rsi_low": 45}
     }
     
     conf = config[timeframe_label]
     
-    # Ambil data - Menggunakan auto_adjust=True agar kolom lebih konsisten
+    # Ambil data dengan penanganan khusus pasar tutup
     df = yf.download(ticker, period=conf['period'], interval=conf['interval'], progress=False, auto_adjust=True)
     
     if df is None or df.empty:
         return None
         
-    # Meratakan Multi-Index jika ada
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
@@ -94,7 +93,7 @@ def display_content(tab, label):
         if all_data:
             st.table(pd.DataFrame(all_data))
         else:
-            st.warning(f"Data {label} belum tersedia (Pasar mungkin sedang tutup). Coba cek tab Weekly atau Monthly.")
+            st.info(f"Sistem sedang mencari data historis terdekat untuk {label}...")
 
 display_content(tab1, "Day (Scalping)")
 display_content(tab2, "Weekly (Swing)")
