@@ -8,12 +8,11 @@ from datetime import datetime
 st.set_page_config(layout="wide", page_title="Master Stock Scanner Pro v2.0")
 st.title("🚀 Master Stock Scanner - Real-Time Dashboard")
 st.write(f"Update Terakhir: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} WIB")
-st.markdown("---")
 
 # 2. DAFTAR SAHAM
 tickers = ["BBRI.JK", "BBCA.JK", "BBNI.JK", "ASII.JK", "TLKM.JK", "BMRI.JK"]
 
-# 3. FUNGSI LOGIKA ANALISIS
+# 3. FUNGSI ANALISIS (DIPERBAIKI UNTUK PASAR TUTUP)
 def fetch_and_analyze(ticker, timeframe_label):
     config = {
         "Day (Scalping)": {"period": "7d", "interval": "15m", "tp": 0.02, "sl": 0.015, "rsi_low": 30},
@@ -22,6 +21,7 @@ def fetch_and_analyze(ticker, timeframe_label):
     }
     
     conf = config[timeframe_label]
+    # Ambil data dengan period lebih panjang (7 hari) agar data hari sebelumnya terbaca
     df = yf.download(ticker, period=conf['period'], interval=conf['interval'], progress=False, auto_adjust=True)
     
     if df is None or df.empty:
@@ -33,10 +33,9 @@ def fetch_and_analyze(ticker, timeframe_label):
     df['RSI'] = ta.rsi(df['Close'], length=14)
     bbands = ta.bbands(df['Close'], length=20, std=2)
     
-    if bbands is None or bbands.empty:
-        return None
-        
+    if bbands is None: return None
     df = pd.concat([df, bbands], axis=1).dropna()
+    
     if df.empty: return None
         
     latest = df.iloc[-1]
@@ -69,13 +68,13 @@ def fetch_and_analyze(ticker, timeframe_label):
         "RSI": round(rsi_val, 2)
     }
 
-# 4. TAMPILAN DASHBOARD DENGAN WARNA
-tab1, tab2, tab3 = st.tabs(["🕒 Day Scalping", "📅 Weekly Swing", "🏛️ Monthly Invest"])
-
-def color_df(val):
+# 4. TAMPILAN DASHBOARD BERWARNA
+def color_status(val):
     if "SIAP SEROK" in str(val): return 'background-color: #d4edda; color: #155724; font-weight: bold'
     if "JUAL" in str(val): return 'background-color: #f8d7da; color: #721c24; font-weight: bold'
     return ''
+
+tab1, tab2, tab3 = st.tabs(["🕒 Day Scalping", "📅 Weekly Swing", "🏛️ Monthly Invest"])
 
 def display_content(tab, label):
     with tab:
@@ -88,10 +87,9 @@ def display_content(tab, label):
         
         if all_data:
             df_final = pd.DataFrame(all_data)
-            # Menerapkan pewarnaan pada tabel
-            st.dataframe(df_final.style.applymap(color_df, subset=['Status']), use_container_width=True)
+            st.dataframe(df_final.style.applymap(color_status, subset=['Status']), use_container_width=True)
         else:
-            st.info(f"Mencari data historis untuk {label}...")
+            st.info(f"Data {label} sedang dimuat. Jika tetap kosong, tunggu bursa buka pukul 09:00 WIB.")
 
 display_content(tab1, "Day (Scalping)")
 display_content(tab2, "Weekly (Swing)")
