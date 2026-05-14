@@ -7,27 +7,26 @@ from datetime import datetime
 # 1. KONFIGURASI HALAMAN
 st.set_page_config(layout="wide", page_title="Master Stock Scanner Pro v3.0")
 
-# Custom CSS untuk mempercantik tampilan tabel dan bar
+# Custom CSS untuk Bar Metrics
 st.markdown("""
     <style>
-    .main { background-color: #f5f7f9; }
     div[data-testid="metric-container"] {
         background-color: #ffffff;
         border: 1px solid #e0e0e0;
-        padding: 10px 20px;
+        padding: 15px;
         border-radius: 10px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
     }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🚀 Master Stock Scanner - Pro Dashboard")
-st.write(f"Update Terakhir: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} WIB")
-st.markdown("---")
+st.title("🚀 Master Stock Scanner - Terupdate")
+st.write(f"Waktu Sistem: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} WIB")
 
 # 2. DAFTAR SAHAM
 tickers = ["BBRI.JK", "BBCA.JK", "BBNI.JK", "ASII.JK", "TLKM.JK", "BMRI.JK"]
 
-# 3. FUNGSI ANALISIS LOGIKA
+# 3. FUNGSI ANALISIS TERUPDATE
 def fetch_and_analyze(ticker, timeframe_label):
     config = {
         "Day (Scalping)": {"period": "1mo", "interval": "1h", "tp": 0.02, "sl": 0.015, "rsi_low": 30},
@@ -44,79 +43,66 @@ def fetch_and_analyze(ticker, timeframe_label):
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
+    # Indikator
     df['RSI'] = ta.rsi(df['Close'], length=14)
     bbands = ta.bbands(df['Close'], length=20, std=2)
     
-    if bbands is None or bbands.empty:
-        return None
-        
-    df = pd.concat([df, bbands], axis=1).dropna(subset=['Close', 'RSI'])
-    if df.empty: return None
-        
-    latest = df.iloc[-1]
-    col_bbl = [c for c in df.columns if 'BBL' in c]
-    col_bbu = [c for c in df.columns if 'BBU' in c]
+    if bbands is None: return None
+    df = pd.concat([df, bbands], axis=1)
     
-    curr_price = float(latest['Close'])
+    # LOGIKA UPDATE: Ambil baris terakhir yang benar-benar ada harganya (Bukan NaN)
+    df_valid = df.dropna(subset=['Close', 'RSI'])
+    if df_valid.empty: return None
+    latest = df_valid.iloc[-1]
+    
+    col_bbl = [c for c in df_valid.columns if 'BBL' in c]
+    col_bbu = [c for c in df_valid.columns if 'BBU' in c]
+    
+    price = float(latest['Close'])
     rsi_val = float(latest['RSI'])
     l_band = float(latest[col_bbl])
     u_band = float(latest[col_bbu])
 
-    if rsi_val <= conf['rsi_low'] or curr_price <= l_band:
-        status, color_label = "🟢 SIAP SEROK", "buy"
-        entry, tp, sl = curr_price, round(curr_price * (1 + conf['tp']), 0), round(curr_price * (1 - conf['sl']), 0)
-    elif rsi_val >= (100 - conf['rsi_low']) or curr_price >= u_band:
-        status, color_label = "🔴 JUAL / PROFIT", "sell"
+    if rsi_val <= conf['rsi_low'] or price <= l_band:
+        status, lbl = "🟢 SIAP SEROK", "buy"
+        entry, tp, sl = price, round(price * (1 + conf['tp']), 0), round(price * (1 - conf['sl']), 0)
+    elif rsi_val >= (100 - conf['rsi_low']) or price >= u_band:
+        status, lbl = "🔴 JUAL / PROFIT", "sell"
         entry, tp, sl = "-", "AMBIL PROFIT", "-"
     else:
-        status, color_label = "⚪ WAIT / NEUTRAL", "neutral"
+        status, lbl = "⚪ WAIT", "neutral"
         entry, tp, sl = round(l_band, 0), round(u_band, 0), round(l_band * (1 - conf['sl']), 0)
 
-    return {
-        "Saham": ticker.replace(".JK", ""),
-        "Harga": round(curr_price, 0),
-        "Status": status,
-        "Entry": entry,
-        "TP": tp,
-        "SL": sl,
-        "RSI": round(rsi_val, 2),
-        "label": color_label
-    }
+    return {"Saham": ticker.replace(".JK", ""), "Harga": round(price, 0), "Status": status, 
+            "Entry": entry, "TP": tp, "SL": sl, "RSI": round(rsi_val, 2), "lbl": lbl}
 
-# 4. TAMPILAN DASHBOARD DENGAN TAB DAN BAR BARU
+# 4. TAMPILAN DASHBOARD
 def style_status(val):
     if "SIAP SEROK" in str(val): return 'background-color: #d4edda; color: #155724; font-weight: bold'
     if "JUAL" in str(val): return 'background-color: #f8d7da; color: #721c24; font-weight: bold'
     return ''
 
-tab1, tab2, tab3 = st.tabs(["🕒 Day Scalping", "📅 Weekly Swing", "🏛️ Monthly Invest"])
+tabs = st.tabs(["🕒 Scalping", "📅 Swing", "🏛️ Invest"])
 
-def render_dashboard(tab, label):
+for tab, label in zip(tabs, ["Day (Scalping)", "Weekly (Swing)", "Monthly (Invest)"]):
     with tab:
-        all_results = []
+        results = []
         for t in tickers:
             try:
-                res = fetch_and_analyze(t, label)
-                if res: all_results.append(res)
+                data = fetch_and_analyze(t, label)
+                if data: results.append(data)
             except: continue
         
-        if all_results:
-            df = pd.DataFrame(all_results)
+        if results:
+            df = pd.DataFrame(results)
+            # BAR METRICS (Summary Baru)
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Total", len(tickers))
+            m2.metric("Buy", len(df[df['lbl'] == 'buy']))
+            m3.metric("Sell", len(df[df['lbl'] == 'sell']))
+            m4.metric("Wait", len(df[df['lbl'] == 'neutral']))
             
-            # --- BAR BARU (SUMMARY METRICS) ---
-            c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Total Saham", len(tickers))
-            c2.metric("Siap Serok (Buy)", len(df[df['label'] == 'buy']), delta_color="normal")
-            c3.metric("Jual (Sell)", len(df[df['label'] == 'sell']), delta_color="inverse")
-            c4.metric("Neutral", len(df[df['label'] == 'neutral']))
-            
-            st.markdown("### Detail Rekomendasi")
-            # Tampilkan Tabel Berwarna
-            display_df = df.drop(columns=['label'])
-            st.dataframe(display_df.style.applymap(style_status, subset=['Status']), use_container_width=True)
+            # TABEL
+            st.dataframe(df.drop(columns=['lbl']).style.applymap(style_status, subset=['Status']), use_container_width=True)
         else:
-            st.info(f"Data {label} belum tersedia. Silakan tunggu bursa buka.")
-
-render_dashboard(tab1, "Day (Scalping)")
-render_dashboard(tab2, "Weekly (Swing)")
-render_dashboard(tab3, "Monthly (Invest)")
+            st.warning("Menghubungkan ke database bursa...")
