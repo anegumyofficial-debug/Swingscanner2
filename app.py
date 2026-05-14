@@ -6,56 +6,59 @@ from datetime import datetime
 
 # 1. KONFIGURASI HALAMAN
 st.set_page_config(layout="wide", page_title="Master Stock Scanner Pro v2.0")
-st.title("🚀 Master Stock Scanner - Real-Time Dashboard")
+st.title("🚀 Master Stock Scanner - Dashboard")
 st.write(f"Update Terakhir: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} WIB")
+st.markdown("---")
 
 # 2. DAFTAR SAHAM
 tickers = ["BBRI.JK", "BBCA.JK", "BBNI.JK", "ASII.JK", "TLKM.JK", "BMRI.JK"]
 
-# 3. FUNGSI ANALISIS DATA (DIPERBAIKI AGAR TETAP MUNCUL SAAT PASAR TUTUP)
+# 3. FUNGSI ANALISIS (DIPERBAIKI AGAR TAHAN BANTING)
 def fetch_and_analyze(ticker, timeframe_label):
     config = {
-        "Day (Scalping)": {"period": "7d", "interval": "15m", "tp": 0.02, "sl": 0.015, "rsi_low": 30},
-        "Weekly (Swing)": {"period": "3mo", "interval": "1d", "tp": 0.07, "sl": 0.04, "rsi_low": 40},
-        "Monthly (Invest)": {"period": "1y", "interval": "1wk", "tp": 0.15, "sl": 0.07, "rsi_low": 45}
+        "Day (Scalping)": {"period": "1mo", "interval": "1h", "tp": 0.02, "sl": 0.015, "rsi_low": 30},
+        "Weekly (Swing)": {"period": "6mo", "interval": "1d", "tp": 0.07, "sl": 0.04, "rsi_low": 40},
+        "Monthly (Invest)": {"period": "2y", "interval": "1wk", "tp": 0.15, "sl": 0.07, "rsi_low": 45}
     }
     
     conf = config[timeframe_label]
     
-    # Ambil data dengan period 7 hari agar data hari perdagangan terakhir selalu terbaca
+    # Ambil data - Gunakan period lebih lama agar data tidak kosong saat pasar tutup
     df = yf.download(ticker, period=conf['period'], interval=conf['interval'], progress=False, auto_adjust=True)
     
     if df is None or df.empty:
         return None
         
-    # Meratakan kolom jika ada Multi-Index
+    # Meratakan kolom (Fix Multi-Index)
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
-    # Hitung Indikator Teknikal
+    # Hitung Indikator
     df['RSI'] = ta.rsi(df['Close'], length=14)
     bbands = ta.bbands(df['Close'], length=20, std=2)
     
     if bbands is None or bbands.empty:
         return None
         
-    df = pd.concat([df, bbands], axis=1).dropna()
+    df = pd.concat([df, bbands], axis=1)
     
-    if df.empty:
+    # AMBIL DATA TERAKHIR YANG VALID (Tidak Boleh Kosong)
+    df_clean = df.dropna(subset=['Close', 'RSI'])
+    if df_clean.empty:
         return None
         
-    latest = df.iloc[-1]
+    latest = df_clean.iloc[-1]
     
-    # Deteksi kolom Bollinger secara otomatis untuk mencegah KeyError
-    col_bbl = [c for c in df.columns if 'BBL' in c]
-    col_bbu = [c for c in df.columns if 'BBU' in c]
+    # Deteksi kolom Bollinger secara otomatis
+    col_bbl = [c for c in df_clean.columns if 'BBL' in c]
+    col_bbu = [c for c in df_clean.columns if 'BBU' in c]
     
     curr_price = float(latest['Close'])
     rsi_val = float(latest['RSI'])
     l_band = float(latest[col_bbl])
     u_band = float(latest[col_bbu])
 
-    # Penentuan Sinyal Warna
+    # Penentuan Sinyal
     if rsi_val <= conf['rsi_low'] or curr_price <= l_band:
         status, entry = "🟢 SIAP SEROK", curr_price
         tp = round(curr_price * (1 + conf['tp']), 0)
@@ -77,8 +80,8 @@ def fetch_and_analyze(ticker, timeframe_label):
         "RSI": round(rsi_val, 2)
     }
 
-# 4. TAMPILAN DASHBOARD BERWARNA
-def color_df(val):
+# 4. TAMPILAN DASHBOARD
+def color_status(val):
     if "SIAP SEROK" in str(val): return 'background-color: #d4edda; color: #155724; font-weight: bold'
     if "JUAL" in str(val): return 'background-color: #f8d7da; color: #721c24; font-weight: bold'
     return ''
@@ -92,15 +95,14 @@ def display_content(tab, label):
             try:
                 res = fetch_and_analyze(t, label)
                 if res: all_data.append(res)
-            except:
+            except Exception as e:
                 continue
         
         if all_data:
-            df_display = pd.DataFrame(all_data)
-            # Menampilkan tabel dengan gaya warna sesuai status
-            st.dataframe(df_display.style.applymap(color_df, subset=['Status']), use_container_width=True)
+            df_final = pd.DataFrame(all_data)
+            st.dataframe(df_final.style.applymap(color_status, subset=['Status']), use_container_width=True)
         else:
-            st.info(f"Data {label} sedang diambil dari riwayat bursa terakhir...")
+            st.warning("Data sedang tidak tersedia di server Yahoo Finance untuk saat ini.")
 
 display_content(tab1, "Day (Scalping)")
 display_content(tab2, "Weekly (Swing)")
