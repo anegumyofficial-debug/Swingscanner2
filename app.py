@@ -3,6 +3,7 @@ import pandas as pd
 import yfinance as yf
 import pandas_ta as ta
 from datetime import datetime
+import pytz  
 import concurrent.futures
 
 # --- 1. KONFIGURASI HALAMAN ---
