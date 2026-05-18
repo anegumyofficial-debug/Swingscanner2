@@ -212,7 +212,7 @@ with st.sidebar:
     saham_pilihan = st.multiselect(
         "Pilih Emiten Pantauan:", 
         options=master_tickers_clean, 
-        default=["BBCA", "BBRI", "AADI", "CMRY"])
+        default=["BBCA", "BBRI", "BBNI", "CMRY", "AMRT", "ANTM", "BBNI","ITMG","UNTR","GGRM"])
 
 if len(saham_pilihan) > 0:
     df_scalp = run_scalper_scanner(saham_pilihan)
