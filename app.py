@@ -21,19 +21,54 @@ st.markdown("""
 @st.cache_data(ttl=604800)
 def load_all_market_tickers():
     saham_lengkap = [
-        "AADI", "AALI", "ABBA", "ABDA", "ABMM", "ACES", "ACST", "ADCP", "ADHI", "ADME",
-        "ADRO", "AKRA", "AMMN", "AMRT", "ANTM", "APEX", "ARNA", "ARTO", "ASII", "ASRI", 
-        "ASSA", "AUTO", "AVIA", "BBCA", "BBNI", "BBRI", "BBTN", "BBYB", "BCIC", "BDMN",
-        "BFIN", "BGTG", "BIPP", "BKSL", "BMRI", "BMTR", "BNGA", "BNLI", "BRMS", "BRIS",
-        "BSDE", "BTEK", "BTPS", "BUMI", "BUVA", "CARS", "CENT", "CINT", "CLEO", "CMNP",
-        "CNTX", "CPIN", "CTRA", "DIGI", "DILD", "DLTA", "DMMX", "DMAS", "DOOH", "ELSA",
-        "EMTK", "ENRG", "EXCL", "FAST", "FILM", "FORU", "FPNI", "GARA", "GDST", "GGRM",
-        "GIAA", "GJTL", "GOTO", "GPSO", "HDFA", "HEAL", "HISP", "HMPA", "HMSP", "HRUM",
-        "IATA", "INCF", "INDF", "INDY", "INKP", "INTP", "ISAT", "ITMG", "KAEF", "KIJA",
-        "KLBF", "KPIG", "KREN", "LANC", "LPKR", "LPPF", "MAPI", "MDKA", "MEDC", "MLPL",
-        "MNCN", "MPPA", "MYOR", "NATO", "NZIA", "OASA", "PANS", "PBRX", "PGAS", "PGJO",
-        "PNBS", "PNLF", "PTBA", "PTPP", "PWON", "RMKO", "SCMA", "SIDO", "SMGR", "SMRA",
-        "SRTG", "SSMS", "TINS", "TLKM", "TOWR", "TPIA", "UNTR", "UNVR", "VKTR", "WIKA"
+         # --- PERBANKAN & KEUANGAN ---
+        "BBCA", "BBRI", "BMRI", "BBNI", "BRIS", "BBTN", "BDMN", "BTPN", "BJBR", "BJTM", 
+        "AGRO", "BCIC", "BINA", "DNAR", "MAYB", "MEGA", "PNBN", "PNBS", "BVIC", "BBHI", 
+        "ARTO", "BBYB", "BYBK", "BNGA", "BNLI", "BSIM", "NISP", "PNLF", "PANS", "ADMF",
+        "BCAP", "BBLD", "BABP", "BACA", "BESS", "CFIN", "DEFI", "GSMF", "MASB", "NOBU",
+        
+        # --- TAMBANG, ENERGI & MINERAL ---
+        "AADI", "ADRO", "PTBA", "ITMG", "HRUM", "INDY", "DOID", "KKGI", "BYAN", "GEMS", 
+        "BUMI", "DEWA", "TOBA", "MEDC", "ENRG", "PGAS", "AKRA", "PGEO", "ANTM", "TINS", 
+        "INCO", "MDKA", "MBMA", "NCKL", "BRMS", "DKFT", "PSAB", "ZINC", "IFSH", "MBAP", 
+        "SGER", "DSSA", "ELPI", "APEX", "ARTI", "BIPI", "BOSS", "CTTH", "CUAN",
+        "GREN", "IATA", "MDVS", "MITI", "PKPK", "RMKO", "RMKE", "SURE", "WOWS",
+        
+        # --- INFRASTRUKTUR, TELEKOMUNIKASI & LOGISTIK ---
+        "MORA", "TLKM", "EXCL", "ISAT", "FREN", "TOWR", "TBIG", "CENT", "JSMR", "BIRD", 
+        "SMDR", "TMAS", "ASSA", "META", "CMNP", "POWR", "KEEN", "ARKO", "WEGE", "WIKA", 
+        "PTPP", "ADHI", "TOTL", "ACST", "BPII", "BLTA", "GIAA", "NELY", "HAIS", "IPCM",
+        "BALI", "BUKK", "CASS", "GHON", "GIPH", "HITS", "IBST", "JAST", "LINK", "PORT",
+        
+        # --- BARANG KONSUMEN PRIMER ---
+        "CMRY", "INDF", "ICBP", "UNVR", "MYOR", "GGRM", "HMSP", "WIIM", "AALI", "LSIP", 
+        "SIMP", "BWPT", "TAPG", "DSNG", "SSMS", "CLEO", "CAMP", "ROTI", "GOOD", "PSSI", 
+        "STAA", "TBLA", "SGRO", "SMAR", "CPRO", "JPFA", "CPIN", "MAIN", "WMUU", "AISA",
+        "ALTO", "BISI", "BTEK", "BUDI", "CEKA", "DLTA", "FOOD", "IKAN", "KEJU", "PANI",
+        
+        # --- BARANG KONSUMEN NON-PRIMER ---
+        "ASII", "ACES", "MAPI", "MAPA", "ERAA", "RALS", "AMRT", "MEDI", "MNCN", "SCMA", 
+        "EMTK", "NETV", "AUTO", "DRMA", "SMSM", "GJTL", "MASA", "IMAS", "LPPF", "CBDK",
+        "PMMP", "PANR", "BUVA", "MDIA", "FORU", "AGAR", "AMMS", "BABY", "BELI", "BIPN", 
+        "CARS", "EPAC", "FILM", "GLOB", "HOME", "HOTL", "IKBI", "KBLA", "LPIN", "MSIN",
+        
+        # --- KESEHATAN & FARMASI ---
+        "KLBF", "MIKA", "HEAL", "SILO", "SAME", "PRDA", "TSPC", "KAEF", "INAF", "PEHA", 
+        "BMHS", "IRRA", "OMED", "SIDO", "ASTA", "CARE", "DGNS", "MREI", "PRIM", "SOCI",
+        
+        # --- PROPERTI & REAL ESTATE ---
+        "BSDE", "PWON", "CTRA", "SMRA", "ASRI", "DUTI", "DILD", "PPRO", "LPCK", "LPKR", 
+        "MDLN", "BKSL", "KIJA", "BEST", "SSIA", "AMAN", "BAPA", "FMII", "JRPT",
+        "ADMG", "AMOR", "APLN", "BIPP", "COCO", "CPRI", "DMAS", "EMDE", "GURA",
+        
+        # --- TEKNOLOGI & DIGITAL EKONOMI ---
+        "GOTO", "BUKA", "WIFI", "ATIC", "HDIT", "MLPT", "MCAS", "DIVA", "ASPI", "GLVA", 
+        "ZYRX", "AWAN", "BTEL", "CHIP", "CYBR", "KREN", "LUCK", "PTMP", "SKYB",
+        
+        # --- PERINDUSTRIAN, KIMIA & MATERIAL DASAR ---
+        "AMMN", "SMGR", "INTP", "BRPT", "TPIA", "INKP", "TKIM", "ANJT", "LTLS", "UNIC", 
+        "AGII", "ESSA", "TOTO", "AVIA", "MARK", "ALKA", "AKPI", "ALMI", "BAJA", "BRAM", 
+        "BRNA", "GDST", "IGAR", "IMPC", "INAI", "INCI", "KRAS", "LION", "LMSH", "NIKL"
     ]
     return sorted([f"{t}.JK" for t in saham_lengkap])
 
