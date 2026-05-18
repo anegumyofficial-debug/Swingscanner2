@@ -9,6 +9,10 @@ import concurrent.futures
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Scalper Radar BEI - Full Edition", layout="wide", page_icon="⚡")
 
+# Mengunci jam server ke zona waktu WIB (Asia/Jakarta)
+wib_tz = pytz.timezone('Asia/Jakarta')
+wib_now = datetime.now(wib_tz)
+
 # --- 2. CUSTOM CSS SCALPER ---
 st.markdown("""
     <style>
