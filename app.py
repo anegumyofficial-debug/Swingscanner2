@@ -201,7 +201,9 @@ def run_scalper_scanner(ticker_list):
     return pd.DataFrame(results)
     
 st.write(f"⏰ Jam Sinkronisasi Terakhir: **{wib_now.strftime('%d-%m-%Y %H:%M:%S')} WIB** (Zona Waktu Terkunci Asia/Jakarta)")
-
+if st.button("🔄 Paksa Ambil Data Baru (Clear Cache)"):
+    st.cache_data.clear()
+    
 # --- 5. INTERFACE PANEL KONTROL & SIDEBAR ---
 st.markdown("<h1 class='main-title'>⚡ Scalper Radar Pro (Sinyal Siap Buy & Target TP/SL)</h1>", unsafe_allow_html=True)
 
