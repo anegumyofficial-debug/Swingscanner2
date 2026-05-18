@@ -199,6 +199,8 @@ def run_scalper_scanner(ticker_list):
             if res is not None:
                 results.append(res)
     return pd.DataFrame(results)
+    
+st.write(f"⏰ Jam Sinkronisasi Terakhir: **{wib_now.strftime('%d-%m-%Y %H:%M:%S')} WIB** (Zona Waktu Terkunci Asia/Jakarta)")
 
 # --- 5. INTERFACE PANEL KONTROL & SIDEBAR ---
 st.markdown("<h1 class='main-title'>⚡ Scalper Radar Pro (Sinyal Siap Buy & Target TP/SL)</h1>", unsafe_allow_html=True)
