@@ -17,11 +17,12 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. DATABASE EMITEN UTUH DAN LENGKAP (80+ EMITEN BEI) ---
+
+# --- 3. DATABASE EMITEN BEI ---
 @st.cache_data(ttl=604800)
-def load_all_market_tickers():
-    saham_lengkap = [
-         # --- PERBANKAN & KEUANGAN ---
+def load_all_indonesia_tickers():
+    saham_bei = [
+        # --- PERBANKAN & KEUANGAN ---
         "BBCA", "BBRI", "BMRI", "BBNI", "BRIS", "BBTN", "BDMN", "BTPN", "BJBR", "BJTM", 
         "AGRO", "BCIC", "BINA", "DNAR", "MAYB", "MEGA", "PNBN", "PNBS", "BVIC", "BBHI", 
         "ARTO", "BBYB", "BYBK", "BNGA", "BNLI", "BSIM", "NISP", "PNLF", "PANS", "ADMF",
@@ -70,19 +71,18 @@ def load_all_market_tickers():
         "AGII", "ESSA", "TOTO", "AVIA", "MARK", "ALKA", "AKPI", "ALMI", "BAJA", "BRAM", 
         "BRNA", "GDST", "IGAR", "IMPC", "INAI", "INCI", "KRAS", "LION", "LMSH", "NIKL"
     ]
-    return sorted([f"{t}.JK" for t in saham_lengkap])
+    
+    cleaned_list = []
+    for code in saham_bei:
+        c_clean = str(code).strip().upper()
+        if not c_clean.endswith(".JK"):
+            c_clean = f"{c_clean}.JK"
+        cleaned_list.append(c_clean)
+        
+    return sorted(list(set(cleaned_list)))
 
-master_tickers_jk = load_all_market_tickers()
+master_tickers_jk = load_all_indonesia_tickers()
 master_tickers_clean = [t.replace(".JK", "") for t in master_tickers_jk]
-
-def clean_yf_dataframe(df):
-    if df is None or df.empty:
-        return None
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    df = df.copy()
-    df.columns = [str(col).strip() for col in df.columns]
-    return df
 
 # --- 4. ENGINE ANALISIS INTERDAY SCALPING & VALIDASI FILTER ---
 def analyze_scalping_momentum(ticker):
