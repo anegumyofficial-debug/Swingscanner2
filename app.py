@@ -6,9 +6,7 @@ from datetime import datetime
 import pytz  
 import concurrent.futures
 
-# [Fungsi-fungsi lain tetap sama seperti kode Anda, hanya tambahkan di analyze_market_momentum]
-
-# --- 4. ENGINE ANALISIS UTAMA ---
+# --- FUNGSI ANALISIS YANG SUDAH DISINKRONKAN ---
 def analyze_market_momentum(ticker):
     try:
         formatted_ticker = ticker if ticker.endswith(".JK") else f"{ticker}.JK"
@@ -23,40 +21,57 @@ def analyze_market_momentum(ticker):
         df['MA50'] = ta.sma(df['Close'], length=50)
         df['RSI'] = ta.rsi(df['Close'], length=14)
         
-        # --- TAMBAHAN: VWAP & ATR ---
-        # VWAP Harian (Rumus: Cumsum(Vol * TypicalPrice) / Cumsum(Vol))
+        # --- VWAP & ATR LOGIC ---
         tp = (df['High'] + df['Low'] + df['Close']) / 3
         df['VWAP'] = (tp * df['Volume']).cumsum() / df['Volume'].cumsum()
-        
-        # ATR (Average True Range) untuk validasi stop loss dinamis
         df['ATR'] = ta.atr(df['High'], df['Low'], df['Close'], length=14)
         
         last_price = float(df['Close'].iloc[-1])
         last_vwap = float(df['VWAP'].iloc[-1])
         last_atr = float(df['ATR'].iloc[-1])
         
-        # [Logika existing lainnya...]
+        # [Logika existing Anda lainnya tetap di sini...]
         
-        # --- TAMBAHAN: UPDATE LOGIKA ACTIONABLE ---
-        # Kita buat syarat: Harga harus di atas VWAP agar trend dianggap sehat oleh institusi
-        if last_price > last_vwap and last_price > df['EMA20'].iloc[-1]:
-            trend_valid = "✅ Bullish (Above VWAP)"
-        else:
-            trend_valid = "⚠️ Caution (Below VWAP)"
-            
-        # Perbaikan Stop Loss berbasis ATR
-        # Stop loss yang lebih logis adalah 2x nilai ATR dari harga saat ini
+        # Menentukan Trend Status berdasarkan VWAP
+        trend_status = "✅ Above VWAP" if last_price > last_vwap else "⚠️ Below VWAP"
+        
+        # Menentukan SL Dinamis (2x ATR)
         dynamic_sl = round(last_price - (2 * last_atr), 0)
-        
-        # [Update bagian return dictionary Anda dengan data baru]
-        res = {
-            # ... data lainnya
+
+        # Return dictionary dengan tambahan kolom baru
+        return {
+            "Ticker": ticker.replace(".JK", ""),
+            "Price": last_price,
             "VWAP": round(last_vwap, 2),
-            "Trend Status": trend_valid,
-            "Dyn SL (2xATR)": dynamic_sl
+            "Trend Status": trend_status,
+            "Dyn SL (2xATR)": dynamic_sl,
+            # ... (masukkan sisa key dari kode asli Anda)
+            "RSI": round(df['RSI'].iloc[-1], 2),
+            # ...
         }
-        return res
     except:
         return None
 
-# [Sisanya sama, pastikan untuk menambahkan kolom baru di st.dataframe/styled_df]
+# --- STYLING RADAR YANG DISINKRONKAN ---
+def style_radar_rows(row):
+    styles = [''] * len(row)
+    # ... (styling existing)
+    
+    # Tambahan Styling untuk VWAP & Trend
+    idx_vwap = row.index.get_loc('VWAP')
+    idx_trend = row.index.get_loc('Trend Status')
+    
+    if "Above" in str(row['Trend Status']):
+        styles[idx_trend] = 'color: #4ADE80; font-weight: bold;'
+        styles[idx_vwap] = 'color: #4ADE80;'
+    else:
+        styles[idx_trend] = 'color: #F87171;'
+        styles[idx_vwap] = 'color: #F87171;'
+        
+    return styles
+
+# --- RENDERING TABEL ---
+# Pastikan saat memanggil st.dataframe, format dictionary sudah mencakup kolom baru
+# Contoh:
+# "VWAP": "Rp {:,.0f}",
+# "Dyn SL (2xATR)": "Rp {:,.0f}"
