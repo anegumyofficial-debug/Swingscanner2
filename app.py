@@ -379,7 +379,7 @@ if len(saham_pilihan) > 0:
                                       })
             st.dataframe(styled_df, use_container_width=True, height=520)
         
-        # --- 6. TABEL REKOMENDASI STRATEGI (Tabel Akhir) ---
+        # --- 6. TABEL REKOMENDASI STRATEGI ---
         st.markdown("### 🎯 Panduan Eksekusi: Probabilitas & Masa Trading")
         data_panduan = {
             "Kategori Sinyal": ["🔥 SUPER BUY", "🎯 BUY (Oversold)", "⏳ Wait / Neutral", "🚨 RISK (Jenuh Beli)"],
