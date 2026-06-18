@@ -391,6 +391,16 @@ if len(saham_pilihan) > 0:
         df_panduan = pd.DataFrame(data_panduan)
         st.table(df_panduan)
         
+        # --- TABEL TAMBAHAN MATRIKS KEPUTUSAN ---
+        st.markdown("### 📋 Matriks Pengambilan Keputusan: Tren vs. Sinyal")
+        matriks_data = {
+            "Tren": ["Up-Trend", "Up-Trend", "Down-Trend", "Sideways"],
+            "Sinyal": ["SUPER BUY", "RISK (Jenuh Beli)", "SUPER BUY", "Neutral"],
+            "Tindakan Utama": ["Aggressive Buy (Accumulate)", "Profit Taking / Hold", "Cicil Beli (Spekulatif & Ketat SL)", "Skip / Wait & See"]
+        }
+        df_matriks = pd.DataFrame(matriks_data)
+        st.table(df_matriks)
+        
         st.info("""
         💡 **Panduan Waktu Eksekusi (Serok):**
         * **Saat Pembukaan (09:00 - 09:15):** Ideal untuk *Scalper* menangkap momentum *gap* harga. Pantau *Unusual Vol*.
