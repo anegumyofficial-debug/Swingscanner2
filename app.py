@@ -194,25 +194,25 @@ def analyze_market_momentum(ticker):
         return {
             "Ticker": ticker_name,
             "Price": last_price,
-            "VWAP Baseline": round(last_vwap, 0),
             "Change %": round(change_pct, 2),
-            "Est For Buy (B)": round(est_foreign_buy, 2),
-            "Est For Sell (S)": round(est_foreign_sell, 2),
-            "Net Foreign (B)": round(net_foreign_b, 2),
-            "Net Foreign Avg": round(net_foreign_avg, 2),
+            "VWAP Baseline": round(last_vwap, 0),
+            "Nego Price": simulated_nego_price,
             "Potensi +/- (%)": round(potensi_change_pct, 2),
             "Prediksi Harga": prediksi_harga_saham,
+            "RSI": round(last_rsi, 2),
             "Inst Flow": inst_flow,
-            "IDS Disclosure": ids_disclosure,
             "Dana Masuk %": round(p_masuk, 1),
             "Dana Keluar %": round(p_keluar, 1),
-            "IDS Nego": is_nego_active,
-            "Nego Price": simulated_nego_price,
-            "RSI": round(last_rsi, 2),
             "Trend": trend_label,
             "Actionable": action_signal,
             "Proteksi SL": stop_loss,
-            "Target TP": take_profit
+            "Target TP": take_profit,
+            "IDS Disclosure": ids_disclosure,
+            "IDS Nego": is_nego_active,
+            "Est For Buy (B)": round(est_foreign_buy, 2),
+            "Est For Sell (S)": round(est_foreign_sell, 2),
+            "Net Foreign (B)": round(net_foreign_b, 2),
+            "Net Foreign Avg": round(net_foreign_avg, 2)
         }
     except:
         return None
@@ -321,75 +321,64 @@ if len(saham_pilihan) > 0:
             
         df_radar = df_radar.sort_values(by=["Dana Masuk %", "Net Foreign Avg"], ascending=[False, False])
         
+        # --- FUNGSI STYLE ---
         def style_radar_rows(row):
             styles = [''] * len(row)
-            action = str(row['Actionable'])
-            trend = str(row['Trend'])
-            flow = str(row['Inst Flow'])
-            disc = str(row['IDS Disclosure'])
-            potensi = float(row['Potensi +/- (%)'])
-            
-            idx_action = row.index.get_loc('Actionable')
-            idx_trend = row.index.get_loc('Trend')
-            idx_flow = row.index.get_loc('Inst Flow')
-            idx_disc = row.index.get_loc('IDS Disclosure')
-            idx_masuk = row.index.get_loc('Dana Masuk %')
-            idx_keluar = row.index.get_loc('Dana Keluar %')
-            idx_potensi = row.index.get_loc('Potensi +/- (%)')
-            idx_prediksi = row.index.get_loc('Prediksi Harga')
-            idx_vwap = row.index.get_loc('VWAP Baseline')
-            
-            styles[idx_masuk] = 'color: #4ADE80; font-weight: bold;'
-            styles[idx_keluar] = 'color: #F87171;'
-            
-            # Logic warna untuk VWAP
-            if row['Price'] > row['VWAP Baseline']:
-                styles[idx_vwap] = 'color: #4ADE80; font-weight: bold;'
-            else:
-                styles[idx_vwap] = 'color: #F87171; font-weight: bold;'
+            # Menggunakan get_loc untuk menyesuaikan dinamis
+            try:
+                idx_action = row.index.get_loc('Actionable')
+                idx_trend = row.index.get_loc('Trend')
+                idx_flow = row.index.get_loc('Inst Flow')
+                idx_disc = row.index.get_loc('IDS Disclosure')
+                idx_masuk = row.index.get_loc('Dana Masuk %')
+                idx_keluar = row.index.get_loc('Dana Keluar %')
+                idx_potensi = row.index.get_loc('Potensi +/- (%)')
+                idx_prediksi = row.index.get_loc('Prediksi Harga')
+                idx_vwap = row.index.get_loc('VWAP Baseline')
+                
+                styles[idx_masuk] = 'color: #4ADE80; font-weight: bold;'
+                styles[idx_keluar] = 'color: #F87171;'
+                
+                if row['Price'] > row['VWAP Baseline']:
+                    styles[idx_vwap] = 'color: #4ADE80; font-weight: bold;'
+                else:
+                    styles[idx_vwap] = 'color: #F87171; font-weight: bold;'
 
-            if potensi > 0:
-                styles[idx_potensi] = 'color: #22C55E; font-weight: bold; background-color: #052E16;'
-                styles[idx_prediksi] = 'color: #4ADE80; font-weight: bold;'
-            elif potensi < 0:
-                styles[idx_potensi] = 'color: #EF4444; font-weight: bold; background-color: #451A03;'
-                styles[idx_prediksi] = 'color: #F87171; font-weight: bold;'
-            
-            if "SUPER BUY" in action:
-                styles[idx_action] = 'background-color: #15803D; color: white; font-weight: bold;'
-            elif "BUY" in action:
-                styles[idx_action] = 'background-color: #166534; color: #BBF7D0;'
+                if float(row['Potensi +/- (%)']) > 0:
+                    styles[idx_potensi] = 'color: #22C55E; font-weight: bold; background-color: #052E16;'
+                    styles[idx_prediksi] = 'color: #4ADE80; font-weight: bold;'
+                elif float(row['Potensi +/- (%)']) < 0:
+                    styles[idx_potensi] = 'color: #EF4444; font-weight: bold; background-color: #451A03;'
+                    styles[idx_prediksi] = 'color: #F87171; font-weight: bold;'
                 
-            if "Up-Trend" in trend or "Accum" in flow:
-                if "Up-Trend" in trend: styles[idx_trend] = 'color: #4ADE80;'
-                if "Accum" in flow: styles[idx_flow] = 'color: #4ADE80; font-weight: bold;'
-            elif "Down-Trend" in trend or "Distribution" in flow:
-                if "Down-Trend" in trend: styles[idx_trend] = 'color: #F87171;'
-                if "Distribution" in flow: styles[idx_flow] = 'color: #F87171; font-weight: bold;'
-                
-            if "Unusual" in disc or "Action" in disc:
-                styles[idx_disc] = 'color: #FBBF24; font-weight: bold;'
-                
+                if "SUPER BUY" in str(row['Actionable']):
+                    styles[idx_action] = 'background-color: #15803D; color: white; font-weight: bold;'
+                elif "BUY" in str(row['Actionable']):
+                    styles[idx_action] = 'background-color: #166534; color: #BBF7D0;'
+                    
+                if "Up-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #4ADE80;'
+                elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
+            except: pass
             return styles
 
         if not df_radar.empty:
             styled_df = df_radar.style.apply(style_radar_rows, axis=1)\
                                       .format({
                                           "Price": "Rp {:,.0f}",
-                                          "VWAP Baseline": "Rp {:,.0f}",
                                           "Change %": "{:+.2f}%",
+                                          "VWAP Baseline": "Rp {:,.0f}",
+                                          "Nego Price": "Rp {:,.0f}",
+                                          "Potensi +/- (%)": "{:+.2f}%",
+                                          "Prediksi Harga": "Rp {:,.0f}",
+                                          "RSI": "{:.2f}",
+                                          "Dana Masuk %": "{:.1f}%",
+                                          "Dana Keluar %": "{:.1f}%",
+                                          "Proteksi SL": "Rp {:,.0f}",
+                                          "Target TP": "Rp {:,.0f}",
                                           "Est For Buy (B)": "{:.2f} B",
                                           "Est For Sell (S)": "{:.2f} B",
                                           "Net Foreign (B)": "{:+.2f} B",
-                                          "Net Foreign Avg": "{:.2f} B",
-                                          "Potensi +/- (%)": "{:+.2f}%",
-                                          "Prediksi Harga": "Rp {:,.0f}",
-                                          "Dana Masuk %": "{:.1f}%",
-                                          "Dana Keluar %": "{:.1f}%",
-                                          "Nego Price": "Rp {:,.0f}",
-                                          "RSI": "{:.2f}",
-                                          "Proteksi SL": "Rp {:,.0f}",
-                                          "Target TP": "Rp {:,.0f}"
+                                          "Net Foreign Avg": "{:.2f} B"
                                       })
             st.dataframe(styled_df, use_container_width=True, height=520)
         else:
