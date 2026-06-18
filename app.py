@@ -380,19 +380,22 @@ if len(saham_pilihan) > 0:
             st.dataframe(styled_df, use_container_width=True, height=520)
         
         # --- 6. TABEL REKOMENDASI STRATEGI ---
-        st.markdown("### 🎯 Panduan Eksekusi: Probabilitas & Masa Trading")
+        st.markdown("### 🎯 Panduan Eksekusi: Probabilitas & Waktu Ideal Serok")
         data_panduan = {
             "Kategori Sinyal": ["🔥 SUPER BUY", "🎯 BUY (Oversold)", "⏳ Wait / Neutral", "🚨 RISK (Jenuh Beli)"],
-            "Gaya Trading": ["Scalping & Quick Swing", "Swing Trading (Retracement)", "Hold / Observasi", "Profit Taking / Exit"],
-            "Masa Trading (Horizon)": ["1 - 3 Hari", "3 - 10 Hari", "N/A", "Exit Segera"],
-            "Probabilitas": ["Sangat Tinggi", "Tinggi", "Sedang", "Rendah"]
+            "Gaya Trading": ["Scalping / Quick Swing", "Swing Trading", "Hold / Observasi", "Profit Taking"],
+            "Masa Trading": ["1 - 3 Hari", "3 - 10 Hari", "N/A", "Exit Segera"],
+            "Probabilitas": ["Sangat Tinggi", "Tinggi", "Sedang", "Rendah"],
+            "Ideal Waktu Serok": ["Pre-Closing (15:50) / Pembukaan", "Istirahat Siang / Menjelang Penutupan", "N/A", "Hindari Entry"]
         }
         df_panduan = pd.DataFrame(data_panduan)
         st.table(df_panduan)
         
         st.info("""
-        💡 **Tips:** Untuk *Scalping*, fokuslah pada emiten dengan sinyal 'SUPER BUY' dan 'Unusual Vol'. 
-        Untuk *Swing*, prioritaskan emiten dengan 'Up-Trend' dan harga di atas VWAP.
+        💡 **Panduan Waktu Eksekusi (Serok):**
+        * **Saat Pembukaan (09:00 - 09:15):** Ideal untuk *Scalper* menangkap momentum *gap* harga. Pantau *Unusual Vol*.
+        * **Istirahat Siang (11:30 - 12:00):** Waktu terbaik untuk mengamati apakah akumulasi berlanjut. Jika harga bertahan di atas VWAP, posisi cukup aman untuk di-*hold*.
+        * **Menjelang Penutupan (15:45 - 16:00):** Paling ideal untuk *Swing Trader*. Jika sinyal 'SUPER BUY' muncul di menit-menit akhir, probabilitas kenaikan besok pagi sangat tinggi.
         """)
         
     else:
