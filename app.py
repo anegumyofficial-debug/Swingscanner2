@@ -324,12 +324,9 @@ if len(saham_pilihan) > 0:
         # --- FUNGSI STYLE ---
         def style_radar_rows(row):
             styles = [''] * len(row)
-            # Menggunakan get_loc untuk menyesuaikan dinamis
             try:
                 idx_action = row.index.get_loc('Actionable')
                 idx_trend = row.index.get_loc('Trend')
-                idx_flow = row.index.get_loc('Inst Flow')
-                idx_disc = row.index.get_loc('IDS Disclosure')
                 idx_masuk = row.index.get_loc('Dana Masuk %')
                 idx_keluar = row.index.get_loc('Dana Keluar %')
                 idx_potensi = row.index.get_loc('Potensi +/- (%)')
@@ -381,7 +378,24 @@ if len(saham_pilihan) > 0:
                                           "Net Foreign Avg": "{:.2f} B"
                                       })
             st.dataframe(styled_df, use_container_width=True, height=520)
-        else:
-            st.warning("⚠️ Tidak ada emiten dari daftar Anda yang lolos kriteria filter saat ini.")
+        
+        # --- 6. TABEL REKOMENDASI STRATEGI (Tabel Akhir) ---
+        st.markdown("### 🎯 Panduan Eksekusi: Probabilitas & Masa Trading")
+        data_panduan = {
+            "Kategori Sinyal": ["🔥 SUPER BUY", "🎯 BUY (Oversold)", "⏳ Wait / Neutral", "🚨 RISK (Jenuh Beli)"],
+            "Gaya Trading": ["Scalping & Quick Swing", "Swing Trading (Retracement)", "Hold / Observasi", "Profit Taking / Exit"],
+            "Masa Trading (Horizon)": ["1 - 3 Hari", "3 - 10 Hari", "N/A", "Exit Segera"],
+            "Probabilitas": ["Sangat Tinggi", "Tinggi", "Sedang", "Rendah"]
+        }
+        df_panduan = pd.DataFrame(data_panduan)
+        st.table(df_panduan)
+        
+        st.info("""
+        💡 **Tips:** Untuk *Scalping*, fokuslah pada emiten dengan sinyal 'SUPER BUY' dan 'Unusual Vol'. 
+        Untuk *Swing*, prioritaskan emiten dengan 'Up-Trend' dan harga di atas VWAP.
+        """)
+        
+    else:
+        st.warning("⚠️ Tidak ada emiten dari daftar Anda yang lolos kriteria filter saat ini.")
 else:
     st.info("👋 Silakan pilih atau tambahkan minimal 1 kode emiten pada kolom sidebar untuk memulai radar.")
