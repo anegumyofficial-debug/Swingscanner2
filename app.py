@@ -390,25 +390,7 @@ if len(saham_pilihan) > 0:
         }
         df_panduan = pd.DataFrame(data_panduan)
         st.table(df_panduan)
-
-# Data Matriks dengan detail persentase dan waktu
-data_matriks = {
-    "Kondisi": ["Sideways + Super Buy", "Sideways + Buy(Oversold)", "DownTrend + Neutral"],
-    "Flow": ["Big Accum", "Small Accum", "Small Accum"],
-    "Action": ["Scalp Aggressive", "Range Trading", "Speculative Scalp"],
-    "Win-Rate": ["~85%", "~70%", "~40%"],
-    "Waktu": ["09:00 - 10:00", "11:30 - 14:00", "15:45 - 16:00"]
-}
-
-df_matriks_detail = pd.DataFrame(data_matriks)
-st.table(df_matriks_detail)
-
-st.write("""
-**Penjelasan Singkat:**
-* **Big Accum (🐋):** Indikator institusi masuk, gunakan VWAP sebagai *support* terkuat.
-* **Small Accum (🐟):** Retail atau *swing player* mulai masuk, gunakan pendekatan bertahap.
-* **VWAP:** Harga di atas VWAP menandakan *Buyer* memegang kendali untuk hari tersebut.
-""")
+        
         # --- TABEL TAMBAHAN MATRIKS KEPUTUSAN ---
         st.markdown("### 📋 Matriks Pengambilan Keputusan: Tren vs. Sinyal")
         matriks_data = {
