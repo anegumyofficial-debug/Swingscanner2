@@ -391,8 +391,6 @@ if len(saham_pilihan) > 0:
         df_panduan = pd.DataFrame(data_panduan)
         st.table(df_panduan)
 
-        st.markdown("### 📋 Matriks Pengambilan Keputusan Detail")
-
 # Data Matriks dengan detail persentase dan waktu
 data_matriks = {
     "Kondisi": ["Sideways + Super Buy", "Sideways + Buy(Oversold)", "DownTrend + Neutral"],
