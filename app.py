@@ -404,8 +404,8 @@ if len(saham_pilihan) > 0:
                 df_radar = df_radar.sort_values(by="Change %", ascending=False)
             else:
                 st.warning("⚠️ Data kosong setelah filter 'Ready to Buy'.")
-            else:
-                st.error("❌ Gagal memproses data emiten. Silakan periksa koneksi atau kode saham.")
+        else:
+            st.error("❌ Gagal memproses data emiten. Silakan periksa koneksi atau kode saham.")
             
     if not df_radar.empty:
         avg_masuk = float(df_radar["Dana Masuk %"].mean())
