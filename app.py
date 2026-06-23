@@ -106,6 +106,9 @@ def analyze_market_momentum(ticker):
             for col in ['Close', 'High', 'Low', 'Volume']:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
                 df = df.dropna()    
+
+        # 5. BARU HITUNG INDIKATOR (RSI, VWAP, STOCH, DLL) SETELAH DF VALID
+        df['RSI'] = ta.rsi(df['Close'], length=14)
         
         # Perhitungan Indikator Dasar
         df['EMA9'] = ta.ema(df['Close'], length=9)
