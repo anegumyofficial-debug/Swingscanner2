@@ -379,7 +379,7 @@ if st.button("🔄 Paksa Ambil Data Baru (Clear Cache)"):
 
 # PANEL SIDEBAR
 with st.sidebar:
-    st.header("⚙️ Panel Filter Pencarian"
+    st.header("⚙️ Panel Filter Pencarian")
     filter_mode = st.radio(
         "Saring Kategori Sinyal:",
         options=["Tampilkan Semua Emiten", "Hanya Sinyal BUY / SUPER BUY", "Hanya Struktur Up-Trend"]
