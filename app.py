@@ -222,7 +222,7 @@ def analyze_market_momentum(ticker):
         # 3. Evaluasi Risiko
         if last_zscore > 2: evaluasi = "🔴 Over-extended (Risiko Koreksi)"
         elif last_zscore < -2: evaluasi = "🟢 Undervalued (Potensi Rebound)"
-            else: evaluasi = "⚪ Normal"
+        else: evaluasi = "⚪ Normal"
             
         return {
             "Ticker": ticker_name,
