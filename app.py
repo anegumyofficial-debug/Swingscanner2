@@ -378,11 +378,8 @@ if len(saham_pilihan) > 0:
         elif filter_mode == "Hanya Struktur Up-Trend":
             df_radar = df_radar[df_radar["Trend"].str.contains("Up-Trend")]
         elif filter_mode == "Hanya Struktur Up-Trend":
-            
-        df_radar = df_radar.sort_values(by=["Dana Masuk %", "Net Foreign Avg"], ascending=[False, False])
-
-        if only_ready_to_buy:
-            df_scalp = df_scalp[df_scalp["Est. Arah"].str.contains("STRONG UP|UP MOMENTUM")]
+            df_radar = df_radar[df_radar["Trend"].str.contains("STRONG UP|UP MOMENTUM")]
+        df_radar = df_radar.sort_values(by=["Dana Masuk %", "Net Foreign Avg","Momentum"], ascending=[False, False])
             
                                         
         # --- FUNGSI STYLE ---
