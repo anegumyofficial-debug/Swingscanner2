@@ -415,16 +415,16 @@ if len(saham_pilihan) > 0:
                     
                 if "Up-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #4ADE80;'
                 elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
-
-            if "STRONG UP" in arah:
-                styles[idx_arah] = 'background-color: #047857; color: white; font-weight: bold;'
-                styles[idx_tp] = 'color: #34D399; font-weight: bold;'
-            elif "UP MOMENTUM" in arah:
-                styles[idx_arah] = 'background-color: #065F46; color: #A7F3D0;'
-                styles[idx_tp] = 'color: #34D399;'
-            elif "DUMP RISK" in arah:
-                styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
-                styles[idx_sl] = 'color: #F87171; font-weight: bold;'
+                    
+                if "STRONG UP" in arah:
+                    styles[idx_arah] = 'background-color: #047857; color: white; font-weight: bold;'
+                    styles[idx_tp] = 'color: #34D399; font-weight: bold;'
+                elif "UP MOMENTUM" in arah:
+                    styles[idx_arah] = 'background-color: #065F46; color: #A7F3D0;'
+                    styles[idx_tp] = 'color: #34D399;'
+                elif "DUMP RISK" in arah:
+                    styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
+                    styles[idx_sl] = 'color: #F87171; font-weight: bold;'
                 
             except: pass
             return styles
