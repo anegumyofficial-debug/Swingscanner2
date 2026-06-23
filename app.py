@@ -383,6 +383,7 @@ with st.sidebar:
     filter_mode = st.radio(
         "Saring Kategori Sinyal:",
         options=["Tampilkan Semua Emiten", "Hanya Sinyal BUY / SUPER BUY", "Hanya Struktur Up-Trend"]
+        only_ready_to_buy = st.checkbox("Hanya Tampilkan Sinyal Siap Beli")
     )
     st.markdown("---")
     saham_pilihan = st.multiselect(
@@ -456,9 +457,8 @@ if len(saham_pilihan) > 0:
                 if "Up-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #4ADE80;'
                 elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
             except: pass
-            return styles
-                
-                if "STRONG UP" in arah:
+
+             if "STRONG UP" in arah:
                     styles[idx_arah] = 'background-color: #047857; color: white; font-weight: bold;'
                     styles[idx_tp] = 'color: #34D399; font-weight: bold;'
                 elif "UP MOMENTUM" in arah:
@@ -467,6 +467,7 @@ if len(saham_pilihan) > 0:
                 elif "DUMP RISK" in arah:
                     styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
                     styles[idx_sl] = 'color: #F87171; font-weight: bold;'
+            
             return styles
            
                 # Tambahan styling untuk Evaluasi Risiko
