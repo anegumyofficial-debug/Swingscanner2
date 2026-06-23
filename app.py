@@ -418,7 +418,18 @@ if len(saham_pilihan) > 0:
                 elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
             except: pass
             return styles
-
+                
+                if "STRONG UP" in arah:
+                    styles[idx_arah] = 'background-color: #047857; color: white; font-weight: bold;'
+                    styles[idx_tp] = 'color: #34D399; font-weight: bold;'
+                elif "UP MOMENTUM" in arah:
+                    styles[idx_arah] = 'background-color: #065F46; color: #A7F3D0;'
+                    styles[idx_tp] = 'color: #34D399;'
+                elif "DUMP RISK" in arah:
+                    styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
+                    styles[idx_sl] = 'color: #F87171; font-weight: bold;'
+            return styles
+            
         if not df_radar.empty:
             styled_df = df_radar.style.apply(style_radar_rows, axis=1)\
                                       .format({
