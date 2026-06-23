@@ -190,6 +190,65 @@ def analyze_market_momentum(ticker):
             action_signal = "⏳ Wait / Neutral"
             stop_loss = 0
             take_profit = 0
+
+        # Penilaian Validitas Volume dan Likuiditas
+        is_volume_spike = last_volume > (last_vol_ma * 1.3)
+        is_highly_liquid = total_turnover_today > 3_000_000_000  # Threshold disesuaikan ke 3B untuk fleksibilitas waktu luar bursa
+        
+        # LOGIKA ESTIMASI ARAH, STOP LOSS, & TAKE PROFIT
+        if last_price > last_vwap and last_price > last_ema and last_k > last_d and last_k < 50:
+            if is_volume_spike and is_highly_liquid:
+                direction = "🚀 STRONG UP (Siap Buy)"
+            else:
+                direction = "📈 UP MOMENTUM (Koleksi)"
+                
+            stop_loss_est = round(min(last_vwap, last_ema), 0)
+            risk_distance = max(last_price - stop_loss_est, last_price * 0.01)
+            take_profit_est = round(last_price + (risk_distance * 1.5), 0)
+            
+        elif last_price > last_vwap and last_k > last_d:
+            direction = "📈 UP MOMENTUM (Koleksi)"
+            stop_loss_est = round(last_vwap, 0)
+            risk_distance = max(last_price - stop_loss_est, last_price * 0.01)
+            take_profit_est = round(last_price + (risk_distance * 1.5), 0)
+            
+        elif last_price < last_ema and last_k < last_d and last_k > 65:
+            direction = "🚨 DUMP RISK (Jangan Haka)"
+            stop_loss_est = round(last_price * 0.99, 0)
+            take_profit_est = 0
+            
+        elif last_price < last_vwap:
+            direction = "📉 DOWN (Hindari)"
+            stop_loss_est = 0
+            take_profit_est = 0
+        else:
+            direction = "⏳ SIDEWAYS (Wait)"
+            stop_loss_est = round(last_price * 0.99, 0)
+            take_profit_est = round(last_price * 1.02, 0)
+            
+        # Catatan Penanda jika data beralih ke mode penutupan harian
+        if is_fallback:
+            direction += " [Hari Kemarin]"
+
+        # Logika Arah & Momentum
+        if last_price > last_vwap and last_k > last_d and last_k < 50:
+            direction = "🚀 STRONG UP (Siap Buy)"
+            status_sinyal = "BUY"
+        elif last_price > last_vwap and last_k > last_d:
+            direction = "📈 UP MOMENTUM (Koleksi)"
+            status_sinyal = "HOLD"
+        elif last_k < last_d and last_k > 65:
+            direction = "🚨 DUMP RISK"
+            status_sinyal = "SELL"
+        else:
+            direction = "⏳ SIDEWAYS"
+            status_sinyal = "WAIT"
+
+        # Analisis Momentum
+        if last_k > 80: momentum = "🔥 Overbought"
+        elif last_k < 20: momentum = "🧊 Oversold"
+        elif last_k > last_d: momentum = "📈 Bullish"
+        else: momentum = "📉 Bearish"
             
         return {
             "Ticker": ticker_name,
@@ -212,7 +271,9 @@ def analyze_market_momentum(ticker):
             "Est For Buy (B)": round(est_foreign_buy, 2),
             "Est For Sell (S)": round(est_foreign_sell, 2),
             "Net Foreign (B)": round(net_foreign_b, 2),
-            "Net Foreign Avg": round(net_foreign_avg, 2)
+            "Net Foreign Avg": round(net_foreign_avg, 2),
+            "Momentum": momentum,
+            "Status Sinyal": status_sinyal
         }
     except:
         return None
