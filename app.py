@@ -398,9 +398,9 @@ if len(saham_pilihan) > 0:
         df_radar = run_mega_scanner(saham_pilihan)
 
     if only_ready_to_buy:
-            df_scalp = df_scalp[df_scalp["Est. Arah"].str.contains("STRONG UP|UP MOMENTUM")]
+            df_radar = df_radar[df_radar["Actionable"].str.contains("BUY|STRONG UP")]
         
-        df_scalp = df_scalp.sort_values(by="Change %", ascending=False)
+        df_radar = df_radar.sort_values(by="Change %", ascending=False)
 
     if not df_radar.empty:
         avg_masuk = float(df_radar["Dana Masuk %"].mean())
