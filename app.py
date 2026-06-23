@@ -269,7 +269,7 @@ def analyze_market_momentum(ticker):
             "Est For Buy (B)": round(est_foreign_buy, 2),
             "Est For Sell (S)": round(est_foreign_sell, 2),
             "Net Foreign (B)": round(net_foreign_b, 2),
-            "Net Foreign Avg": round(net_foreign_avg, 2)
+            "Net Foreign Avg": round(net_foreign_avg, 2),
             "Momentum": momentum,
             "Status Sinyal": status_sinyal
         }
