@@ -382,8 +382,8 @@ if len(saham_pilihan) > 0:
 
         if only_ready_to_buy:
             df_scalp = df_scalp[df_scalp["Est. Arah"].str.contains("STRONG UP|UP MOMENTUM")]
-        
-        df_scalp = df_scalp.sort_values(by="Change %", ascending=False
+            
+            df_scalp = df_scalp.sort_values(by="Change %", ascending=False
                                         
         # --- FUNGSI STYLE ---
         def style_radar_rows(row):
