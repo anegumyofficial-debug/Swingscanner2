@@ -118,10 +118,10 @@ def analyze_market_momentum(ticker):
         df['RSI'] = ta.rsi(df['Close'], length=14)
         df['Vol_MA20'] = df['Volume'].rolling(window=20).mean()
         
+        # Stochastic Oscillator Cepat
         stoch = ta.stoch(df['High'], df['Low'], df['Close'], k=14, d=3)
-        df['STOCHk'] = stoch['STOCHk_14_3_3'] if 'STOCHk_14_3_3' in stoch.columns else 50.0
-        df['STOCHd'] = stoch['STOCHd_14_3_3'] if 'STOCHd_14_3_3' in stoch.columns else 50.0
-        
+        df['STOCHk'] = stoch['STOCHk_14_3_3']
+        df['STOCHd'] = stoch['STOCHd_14_3_3']
         
         # --- FITUR BARU: VOLATILITAS & RISIKO ---
         df['StdDev'] = df['Close'].rolling(window=20).std()
@@ -248,6 +248,8 @@ def analyze_market_momentum(ticker):
             "Nego Price": simulated_nego_price,
             "Potensi +/- (%)": round(potensi_change_pct, 2),
             "Prediksi Harga": prediksi_harga_saham,
+            "Stoch %K": round(last_k, 2),
+            "Stoch %D": round(last_d, 2),
             "RSI": round(last_rsi, 2),
             "Inst Flow": inst_flow,
             "Dana Masuk %": round(p_masuk, 1),
@@ -422,6 +424,8 @@ if len(saham_pilihan) > 0:
                                           "Change %": "{:+.2f}%",
                                           "VWAP Baseline": "Rp {:,.0f}",
                                           "Nego Price": "Rp {:,.0f}",
+                                          "Stoch %K": "{:.2f}",
+                                          "Stoch %D": "{:.2f}",
                                           "Potensi +/- (%)": "{:+.2f}%",
                                           "Prediksi Harga": "Rp {:,.0f}",
                                           "RSI": "{:.2f}",
