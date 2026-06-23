@@ -397,9 +397,11 @@ if len(saham_pilihan) > 0:
     with st.spinner("Sedang memproses bandarmologi dan data bursa..."):
         df_radar = run_mega_scanner(saham_pilihan)
         
-        if only_ready_to_buy:
-            df_radar = df_radar[df_radar["Actionable"].str.contains("BUY|STRONG UP")]
-        df_radar = df_radar.sort_values(by="Change %", ascending=False)
+        if df_radar is not None and not df_radar.empty:
+            if only_ready_to_buy:
+                df_radar = df_radar[df_radar["Actionable"].str.contains("BUY|STRONG UP")]
+            if not df_radar.empty:
+                df_radar = df_radar.sort_values(by="Change %", ascending=False)
         
     if not df_radar.empty:
         avg_masuk = float(df_radar["Dana Masuk %"].mean())
