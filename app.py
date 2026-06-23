@@ -90,15 +90,19 @@ def clean_yf_dataframe(df):
 def analyze_market_momentum(ticker):
     try:
         formatted_ticker = ticker if ticker.endswith(".JK") else f"{ticker}.JK"
-
+        
+        df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
+        
         # Penanganan Fallback Data
         is_fallback = False
         if df is None or len(df) < 20:
             df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
             is_fallback = True
         
-        if df is None or len(df) < 20: return None
-
+        if df is None or len(df) < 20:
+            return None
+            
+            df = clean_yf_dataframe(df)
         # Perhitungan Indikator Dasar
         df['EMA9'] = ta.ema(df['Close'], length=9)
         df['EMA20'] = ta.ema(df['Close'], length=20)
