@@ -433,7 +433,9 @@ if len(saham_pilihan) > 0:
                 idx_potensi = row.index.get_loc('Potensi +/- (%)')
                 idx_prediksi = row.index.get_loc('Prediksi Harga')
                 idx_vwap = row.index.get_loc('VWAP Baseline')
-                
+                idx_eval = row.index.get_loc('Evaluasi Risiko')
+
+                # Styling dasar
                 styles[idx_masuk] = 'color: #4ADE80; font-weight: bold;'
                 styles[idx_keluar] = 'color: #F87171;'
                 
@@ -441,33 +443,15 @@ if len(saham_pilihan) > 0:
                     styles[idx_vwap] = 'color: #4ADE80; font-weight: bold;'
                 else:
                     styles[idx_vwap] = 'color: #F87171; font-weight: bold;'
-
+                    
+                # Logika Actionable & Trend
                 if float(row['Potensi +/- (%)']) > 0:
                     styles[idx_potensi] = 'color: #22C55E; font-weight: bold; background-color: #052E16;'
                     styles[idx_prediksi] = 'color: #4ADE80; font-weight: bold;'
                 elif float(row['Potensi +/- (%)']) < 0:
                     styles[idx_potensi] = 'color: #EF4444; font-weight: bold; background-color: #451A03;'
                     styles[idx_prediksi] = 'color: #F87171; font-weight: bold;'
-                
-                if "SUPER BUY" in str(row['Actionable']):
-                    styles[idx_action] = 'background-color: #15803D; color: white; font-weight: bold;'
-                elif "BUY" in str(row['Actionable']):
-                    styles[idx_action] = 'background-color: #166534; color: #BBF7D0;'
-                    
-                if "Up-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #4ADE80;'
-                elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
-            except: pass
 
-        
-                elif "UP MOMENTUM" in arah:
-                    styles[idx_arah] = 'background-color: #065F46; color: #A7F3D0;'
-                    styles[idx_tp] = 'color: #34D399;'
-                elif "DUMP RISK" in arah:
-                    styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
-                    styles[idx_sl] = 'color: #F87171; font-weight: bold;'
-            
-            return styles
-           
                 # Tambahan styling untuk Evaluasi Risiko
                 idx_eval = row.index.get_loc('Evaluasi Risiko')
                 eval_val = str(row['Evaluasi Risiko'])
@@ -475,6 +459,23 @@ if len(saham_pilihan) > 0:
                     styles[idx_eval] = 'background-color: #7f1d1d; color: white;'
                 elif "Undervalued" in eval_val:
                     styles[idx_eval] = 'background-color: #064e3b; color: white;'
+                    
+                if "SUPER BUY" in str(row['Actionable']):
+                    styles[idx_action] = 'background-color: #15803D; color: white; font-weight: bold;'
+                elif "BUY" in str(row['Actionable']):
+                    styles[idx_action] = 'background-color: #166534; color: #BBF7D0;'
+                    
+                if "Up-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #4ADE80;'
+                elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
+            
+                elif "UP MOMENTUM" in arah:
+                    styles[idx_arah] = 'background-color: #065F46; color: #A7F3D0;'
+                    styles[idx_tp] = 'color: #34D399;'
+                elif "DUMP RISK" in arah:
+                    styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
+                    styles[idx_sl] = 'color: #F87171; font-weight: bold;'
+            except: 
+                pass
             return styles
             
         if not df_radar.empty:
