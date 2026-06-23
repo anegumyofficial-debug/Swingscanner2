@@ -191,61 +191,6 @@ def analyze_market_momentum(ticker):
             stop_loss = 0
             take_profit = 0
             
-        # LOGIKA ESTIMASI ARAH, STOP LOSS, & TAKE PROFIT
-        if last_price > last_vwap and last_price > last_ema and last_k > last_d and last_k < 50:
-            if is_volume_spike and is_highly_liquid:
-                direction = "🚀 STRONG UP (Siap Buy)"
-            else:
-                direction = "📈 UP MOMENTUM (Koleksi)"
-                
-            stop_loss_est = round(min(last_vwap, last_ema), 0)
-            risk_distance = max(last_price - stop_loss_est, last_price * 0.01)
-            take_profit_est = round(last_price + (risk_distance * 1.5), 0)
-            
-        elif last_price > last_vwap and last_k > last_d:
-            direction = "📈 UP MOMENTUM (Koleksi)"
-            stop_loss_est = round(last_vwap, 0)
-            risk_distance = max(last_price - stop_loss_est, last_price * 0.01)
-            take_profit_est = round(last_price + (risk_distance * 1.5), 0)
-            
-        elif last_price < last_ema and last_k < last_d and last_k > 65:
-            direction = "🚨 DUMP RISK (Jangan Haka)"
-            stop_loss_est = round(last_price * 0.99, 0)
-            take_profit_est = 0
-            
-        elif last_price < last_vwap:
-            direction = "📉 DOWN (Hindari)"
-            stop_loss_est = 0
-            take_profit_est = 0
-        else:
-            direction = "⏳ SIDEWAYS (Wait)"
-            stop_loss_est = round(last_price * 0.99, 0)
-            take_profit_est = round(last_price * 1.02, 0)
-            
-        # Catatan Penanda jika data beralih ke mode penutupan harian
-        if is_fallback:
-            direction += " [Hari Kemarin]"
-
-        # Logika Arah & Momentum
-        if last_price > last_vwap and last_k > last_d and last_k < 50:
-            direction = "🚀 STRONG UP (Siap Buy)"
-            status_sinyal = "BUY"
-        elif last_price > last_vwap and last_k > last_d:
-            direction = "📈 UP MOMENTUM (Koleksi)"
-            status_sinyal = "HOLD"
-        elif last_k < last_d and last_k > 65:
-            direction = "🚨 DUMP RISK"
-            status_sinyal = "SELL"
-        else:
-            direction = "⏳ SIDEWAYS"
-            status_sinyal = "WAIT"
-
-        # Analisis Momentum
-        if last_k > 80: momentum = "🔥 Overbought"
-        elif last_k < 20: momentum = "🧊 Oversold"
-        elif last_k > last_d: momentum = "📈 Bullish"
-        else: momentum = "📉 Bearish"
-            
         return {
             "Ticker": ticker_name,
             "Price": last_price,
@@ -254,8 +199,6 @@ def analyze_market_momentum(ticker):
             "Nego Price": simulated_nego_price,
             "Potensi +/- (%)": round(potensi_change_pct, 2),
             "Prediksi Harga": prediksi_harga_saham,
-            "Stoch %K": round(last_k, 2),
-            "Stoch %D": round(last_d, 2),
             "RSI": round(last_rsi, 2),
             "Inst Flow": inst_flow,
             "Dana Masuk %": round(p_masuk, 1),
@@ -269,9 +212,7 @@ def analyze_market_momentum(ticker):
             "Est For Buy (B)": round(est_foreign_buy, 2),
             "Est For Sell (S)": round(est_foreign_sell, 2),
             "Net Foreign (B)": round(net_foreign_b, 2),
-            "Net Foreign Avg": round(net_foreign_avg, 2),
-            "Momentum": momentum,
-            "Status Sinyal": status_sinyal
+            "Net Foreign Avg": round(net_foreign_avg, 2)
         }
     except:
         return None
@@ -377,11 +318,9 @@ if len(saham_pilihan) > 0:
             df_radar = df_radar[df_radar["Actionable"].str.contains("BUY")]
         elif filter_mode == "Hanya Struktur Up-Trend":
             df_radar = df_radar[df_radar["Trend"].str.contains("Up-Trend")]
-        elif filter_mode == "Hanya Struktur Up-Trend":
-            df_radar = df_radar[df_radar["Trend"].str.contains("STRONG UP|UP MOMENTUM")]
-        df_radar = df_radar.sort_values(by=["Dana Masuk %", "Net Foreign Avg","Momentum"], ascending=[False, False])
             
-                                        
+        df_radar = df_radar.sort_values(by=["Dana Masuk %", "Net Foreign Avg"], ascending=[False, False])
+        
         # --- FUNGSI STYLE ---
         def style_radar_rows(row):
             styles = [''] * len(row)
@@ -393,7 +332,6 @@ if len(saham_pilihan) > 0:
                 idx_potensi = row.index.get_loc('Potensi +/- (%)')
                 idx_prediksi = row.index.get_loc('Prediksi Harga')
                 idx_vwap = row.index.get_loc('VWAP Baseline')
-                idx_momentum = row.index.get_loc('momentum Baseline')
                 
                 styles[idx_masuk] = 'color: #4ADE80; font-weight: bold;'
                 styles[idx_keluar] = 'color: #F87171;'
@@ -417,17 +355,6 @@ if len(saham_pilihan) > 0:
                     
                 if "Up-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #4ADE80;'
                 elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
-                    
-                if "STRONG UP" in arah:
-                    styles[idx_arah] = 'background-color: #047857; color: white; font-weight: bold;'
-                    styles[idx_tp] = 'color: #34D399; font-weight: bold;'
-                elif "UP MOMENTUM" in arah:
-                    styles[idx_arah] = 'background-color: #065F46; color: #A7F3D0;'
-                    styles[idx_tp] = 'color: #34D399;'
-                elif "DUMP RISK" in arah:
-                    styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
-                    styles[idx_sl] = 'color: #F87171; font-weight: bold;'
-                
             except: pass
             return styles
 
