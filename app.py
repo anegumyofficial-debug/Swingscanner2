@@ -360,7 +360,12 @@ with st.sidebar:
 if len(saham_pilihan) > 0:
     with st.spinner("Sedang memproses bandarmologi dan data bursa..."):
         df_radar = run_mega_scanner(saham_pilihan)
-    
+
+    if only_ready_to_buy:
+            df_scalp = df_scalp[df_scalp["Est. Arah"].str.contains("STRONG UP|UP MOMENTUM")]
+        
+        df_scalp = df_scalp.sort_values(by="Change %", ascending=False)
+
     if not df_radar.empty:
         avg_masuk = float(df_radar["Dana Masuk %"].mean())
         avg_keluar = 100.0 - avg_masuk
