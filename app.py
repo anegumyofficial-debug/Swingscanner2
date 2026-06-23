@@ -115,6 +115,11 @@ def analyze_market_momentum(ticker):
         # --- FITUR BARU: VOLATILITAS & RISIKO ---
         df['StdDev'] = df['Close'].rolling(window=20).std()
         df['Z-Score'] = (df['Close'] - df['Close'].rolling(window=20).mean()) / df['StdDev']
+
+        # AMBIL DATA TERAKHIR
+        last_price = float(df['Close'].iloc[-1])
+        last_volume = float(df['Volume'].iloc[-1]) # Pastikan ini konsisten
+        last_vol_ma = float(df['Vol_MA20'].iloc[-1])
         
         # --- FITUR BARU: VOLUME ---
         df['Vol_MA20'] = df['Volume'].rolling(window=20).mean()
@@ -217,7 +222,7 @@ def analyze_market_momentum(ticker):
         else: status_sinyal = "HOLD/WAIT"
             
         # 2. Volume Status
-        vol_status = "🟢 Surge" if last_vol > (last_vol_ma * 1.5) else ("🔴 Low" if last_vol < last_vol_ma else "⚪ Normal")
+        vol_status = "🟢 Surge" if last_volume > (last_vol_ma * 1.5) else ("🔴 Low" if last_volume < last_vol_ma else "⚪ Normal")
         
         # 3. Evaluasi Risiko
         if last_zscore > 2: evaluasi = "🔴 Over-extended (Risiko Koreksi)"
