@@ -90,12 +90,16 @@ def clean_yf_dataframe(df):
 def analyze_market_momentum(ticker):
     try:
         formatted_ticker = ticker if ticker.endswith(".JK") else f"{ticker}.JK"
-        df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
-        df = clean_yf_dataframe(df)
+
+        # Penanganan Fallback Data
+        is_fallback = False
+        if df is None or len(df) < 20:
+            df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
+            is_fallback = True
         
-        if df is None or len(df) < 4 or 'Close' not in df.columns: 
-            return None
-        
+        if df is None or len(df) < 20: return None
+
+        # Perhitungan Indikator Dasar
         df['EMA9'] = ta.ema(df['Close'], length=9)
         df['EMA20'] = ta.ema(df['Close'], length=20)
         df['MA50'] = ta.sma(df['Close'], length=50)
@@ -107,6 +111,14 @@ def analyze_market_momentum(ticker):
         df['STOCHk'] = stoch['STOCHk_14_3_3'] if 'STOCHk_14_3_3' in stoch.columns else 50.0
         df['STOCHd'] = stoch['STOCHd_14_3_3'] if 'STOCHd_14_3_3' in stoch.columns else 50.0
         
+        
+        # --- FITUR BARU: VOLATILITAS & RISIKO ---
+        df['StdDev'] = df['Close'].rolling(window=20).std()
+        df['Z-Score'] = (df['Close'] - df['Close'].rolling(window=20).mean()) / df['StdDev']
+        
+        # --- FITUR BARU: VOLUME ---
+        df['Vol_MA20'] = df['Volume'].rolling(window=20).mean()
+        
         last_price = float(df['Close'].iloc[-1])
         last_vwap = float(df['VWAP'].iloc[-1]) if not pd.isna(df['VWAP'].iloc[-1]) else last_price
         last_ema9 = float(df['EMA9'].iloc[-1]) if not pd.isna(df['EMA9'].iloc[-1]) else last_price
@@ -117,7 +129,8 @@ def analyze_market_momentum(ticker):
         last_d = float(df['STOCHd'].iloc[-1]) if not pd.isna(df['STOCHd'].iloc[-1]) else 50.0
         last_volume = float(df['Volume'].iloc[-1])
         last_vol_ma = float(df['Vol_MA20'].iloc[-1]) if not pd.isna(df['Vol_MA20'].iloc[-1]) else 1.0
-        
+        last_std = float(df['StdDev'].iloc[-1])
+        last_zscore = float(df['Z-Score'].iloc[-1])
         prev_price = float(df['Close'].iloc[-2])
         change_pct = ((last_price - prev_price) / prev_price) * 100
         
@@ -191,6 +204,26 @@ def analyze_market_momentum(ticker):
             stop_loss = 0
             take_profit = 0
             
+        
+        # --- LOGIKA STATUS ---
+        # 1. Momentum & Sinyal
+        if last_k > 80: momentum = "🔥 Overbought"
+        elif last_k < 20: momentum = "🧊 Oversold"
+        elif last_k > last_d: momentum = "📈 Bullish"
+        else: momentum = "📉 Bearish"
+
+        if last_price > df['EMA9'].iloc[-1] and last_k > last_d: status_sinyal = "BUY"
+        elif last_k < last_d and last_k > 65: status_sinyal = "SELL"
+        else: status_sinyal = "HOLD/WAIT"
+            
+        # 2. Volume Status
+        vol_status = "🟢 Surge" if last_vol > (last_vol_ma * 1.5) else ("🔴 Low" if last_vol < last_vol_ma else "⚪ Normal")
+        
+        # 3. Evaluasi Risiko
+        if last_zscore > 2: evaluasi = "🔴 Over-extended (Risiko Koreksi)"
+        elif last_zscore < -2: evaluasi = "🟢 Undervalued (Potensi Rebound)"
+            else: evaluasi = "⚪ Normal"
+            
         return {
             "Ticker": ticker_name,
             "Price": last_price,
@@ -212,7 +245,13 @@ def analyze_market_momentum(ticker):
             "Est For Buy (B)": round(est_foreign_buy, 2),
             "Est For Sell (S)": round(est_foreign_sell, 2),
             "Net Foreign (B)": round(net_foreign_b, 2),
-            "Net Foreign Avg": round(net_foreign_avg, 2)
+            "Net Foreign Avg": round(net_foreign_avg, 2),"Momentum": momentum,
+            "Status Sinyal": status_sinyal,
+            "Vol Status": vol_status,
+            "Volume Now": last_vol,
+            "Volatilitas (StdDev)": round(last_std, 2),
+            "Evaluasi Risiko": evaluasi,
+            "RSI (14)": round(df['RSI'].iloc[-1], 2)
         }
     except:
         return None
@@ -230,6 +269,7 @@ def run_mega_scanner(ticker_list):
 # --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>⚡ Swing & Scalper Pro V2</h1>", unsafe_allow_html=True)
 
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
