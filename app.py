@@ -383,8 +383,9 @@ with st.sidebar:
     filter_mode = st.radio(
         "Saring Kategori Sinyal:",
         options=["Tampilkan Semua Emiten", "Hanya Sinyal BUY / SUPER BUY", "Hanya Struktur Up-Trend"]
-        only_ready_to_buy = st.checkbox("Hanya Tampilkan Sinyal Siap Beli")
+        
     )
+    only_ready_to_buy = st.checkbox("Hanya Tampilkan Sinyal Siap Beli")
     st.markdown("---")
     saham_pilihan = st.multiselect(
         "Kustom Pilih / Ketik Kode Saham Tambahan:",
