@@ -399,7 +399,6 @@ if len(saham_pilihan) > 0:
 
     if only_ready_to_buy:
             df_radar = df_radar[df_radar["Actionable"].str.contains("BUY|STRONG UP")]
-        
         df_radar = df_radar.sort_values(by="Change %", ascending=False)
 
     if not df_radar.empty:
