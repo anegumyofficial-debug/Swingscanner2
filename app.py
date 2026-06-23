@@ -157,7 +157,7 @@ def analyze_market_momentum(ticker):
         
         p_masuk = max(5.0, min(95.0, p_masuk))
         p_keluar = 100.0 - p_masuk
-        total_turnover_b = (last_volume * last_price) / 1_000_000_000 
+        total_turnover_b = (last_volume * last_price) / 1_000_000
         est_foreign_buy = total_turnover_b * (p_masuk / 100.0) * 0.25
         est_foreign_sell = total_turnover_b * (p_keluar / 100.0) * 0.25
         net_foreign_b = est_foreign_buy - est_foreign_sell
