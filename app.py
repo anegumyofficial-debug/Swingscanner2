@@ -249,7 +249,38 @@ def analyze_market_momentum(ticker):
         elif last_k < 20: momentum = "🧊 Oversold"
         elif last_k > last_d: momentum = "📈 Bullish"
         else: momentum = "📉 Bearish"
-            
+            # --- LOGIKA VOLUME TRANSPARAN ---
+        # Mengukur tren volume 5 periode terakhir
+        vol_trend = df['Volume'].rolling(window=5).mean()
+        last_vol = float(df['Volume'].iloc[-1])
+        prev_vol = float(df['Volume'].iloc[-2])
+        
+        # Penentuan Status Volume (Transparan)
+        if last_vol > prev_vol * 1.1:
+            vol_status = "🟢 Naik (Akumulasi)"
+        elif last_vol < prev_vol * 0.9:
+            vol_status = "🔴 Turun (Distribusi)"
+        else:
+            vol_status = "⚪ Datar (Sideways)"
+
+        # Tambahkan di bagian perhitungan indikator
+        # Menghitung Volatilitas (Standard Deviation 20 periode)
+        df['StdDev'] = df['Close'].rolling(window=20).std()
+        # Menghitung Z-Score sederhana untuk evaluasi harga (apakah ekstrem atau tidak)
+        df['Z-Score'] = (df['Close'] - df['Close'].rolling(window=20).mean()) / df['StdDev']
+
+        # Ambil nilai terakhir
+        last_std = float(df['StdDev'].iloc[-1]) if not pd.isna(df['StdDev'].iloc[-1]) else 0
+        last_zscore = float(df['Z-Score'].iloc[-1]) if not pd.isna(df['Z-Score'].iloc[-1]) else 0
+
+        # Evaluasi Risiko
+        if last_zscore > 2:
+            evaluasi = "🔴 Over-extended (Risiko Koreksi)"
+        elif last_zscore < -2:
+            evaluasi = "🟢 Undervalued (Potensi Rebound)"
+        else:
+            evaluasi = "⚪ Normal"
+
         return {
             "Ticker": ticker_name,
             "Price": last_price,
@@ -273,7 +304,10 @@ def analyze_market_momentum(ticker):
             "Net Foreign (B)": round(net_foreign_b, 2),
             "Net Foreign Avg": round(net_foreign_avg, 2),
             "Momentum": momentum,
-            "Status Sinyal": status_sinyal
+            "Status Sinyal": status_sinyal,
+            "Volume Now": last_vol,
+            "Volatilitas (StdDev)": round(last_std, 2),
+            "Evaluasi Risiko": evaluasi
         }
     except:
         return None
@@ -434,6 +468,15 @@ if len(saham_pilihan) > 0:
                     styles[idx_arah] = 'background-color: #991B1B; color: white; font-weight: bold;'
                     styles[idx_sl] = 'color: #F87171; font-weight: bold;'
             return styles
+           
+                # Tambahan styling untuk Evaluasi Risiko
+                idx_eval = row.index.get_loc('Evaluasi Risiko')
+                eval_val = str(row['Evaluasi Risiko'])
+                if "Over-extended" in eval_val:
+                    styles[idx_eval] = 'background-color: #7f1d1d; color: white;'
+                elif "Undervalued" in eval_val:
+                    styles[idx_eval] = 'background-color: #064e3b; color: white;'
+            return styles
             
         if not df_radar.empty:
             styled_df = df_radar.style.apply(style_radar_rows, axis=1)\
@@ -452,7 +495,9 @@ if len(saham_pilihan) > 0:
                                           "Est For Buy (B)": "{:.2f} B",
                                           "Est For Sell (S)": "{:.2f} B",
                                           "Net Foreign (B)": "{:+.2f} B",
-                                          "Net Foreign Avg": "{:.2f} B"
+                                          "Net Foreign Avg": "{:.2f} B",
+                                          "Volatilitas (StdDev)": "{:.2f}",
+                                          "Evaluasi Risiko": "{}"
                                       })
             st.dataframe(styled_df, use_container_width=True, height=520)
         
