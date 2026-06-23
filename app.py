@@ -233,7 +233,7 @@ def analyze_market_momentum(ticker):
         else: status_sinyal = "HOLD/WAIT"
             
         # 2. Volume Status
-        vol_status = "🟢 Surge" if last_volume > (last_vol_ma * 1.5) else ("🔴 Low" if last_volume < last_vol_ma else "⚪ Normal")
+        vol_status = "🟢 Naik (Akumulasi)" if last_volume > (last_vol_ma * 1.5) else ("🔴 Turun (Distribusi)" if last_volume < last_vol_ma else "⚪ Datar (Sideways)")
         
         # 3. Evaluasi Risiko
         if last_zscore > 2: evaluasi = "🔴 Over-extended (Risiko Koreksi)"
