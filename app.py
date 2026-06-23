@@ -190,97 +190,7 @@ def analyze_market_momentum(ticker):
             action_signal = "⏳ Wait / Neutral"
             stop_loss = 0
             take_profit = 0
-
-        # Penilaian Validitas Volume dan Likuiditas
-        is_volume_spike = last_volume > (last_vol_ma * 1.3)
-        is_highly_liquid = total_turnover_today > 3_000_000_000  # Threshold disesuaikan ke 3B untuk fleksibilitas waktu luar bursa
-        
-        # LOGIKA ESTIMASI ARAH, STOP LOSS, & TAKE PROFIT
-        if last_price > last_vwap and last_price > last_ema and last_k > last_d and last_k < 50:
-            if is_volume_spike and is_highly_liquid:
-                direction = "🚀 STRONG UP (Siap Buy)"
-            else:
-                direction = "📈 UP MOMENTUM (Koleksi)"
-                
-            stop_loss_est = round(min(last_vwap, last_ema), 0)
-            risk_distance = max(last_price - stop_loss_est, last_price * 0.01)
-            take_profit_est = round(last_price + (risk_distance * 1.5), 0)
             
-        elif last_price > last_vwap and last_k > last_d:
-            direction = "📈 UP MOMENTUM (Koleksi)"
-            stop_loss_est = round(last_vwap, 0)
-            risk_distance = max(last_price - stop_loss_est, last_price * 0.01)
-            take_profit_est = round(last_price + (risk_distance * 1.5), 0)
-            
-        elif last_price < last_ema and last_k < last_d and last_k > 65:
-            direction = "🚨 DUMP RISK (Jangan Haka)"
-            stop_loss_est = round(last_price * 0.99, 0)
-            take_profit_est = 0
-            
-        elif last_price < last_vwap:
-            direction = "📉 DOWN (Hindari)"
-            stop_loss_est = 0
-            take_profit_est = 0
-        else:
-            direction = "⏳ SIDEWAYS (Wait)"
-            stop_loss_est = round(last_price * 0.99, 0)
-            take_profit_est = round(last_price * 1.02, 0)
-            
-        # Catatan Penanda jika data beralih ke mode penutupan harian
-        if is_fallback:
-            direction += " [Hari Kemarin]"
-
-        # Logika Arah & Momentum
-        if last_price > last_vwap and last_k > last_d and last_k < 50:
-            direction = "🚀 STRONG UP (Siap Buy)"
-            status_sinyal = "BUY"
-        elif last_price > last_vwap and last_k > last_d:
-            direction = "📈 UP MOMENTUM (Koleksi)"
-            status_sinyal = "HOLD"
-        elif last_k < last_d and last_k > 65:
-            direction = "🚨 DUMP RISK"
-            status_sinyal = "SELL"
-        else:
-            direction = "⏳ SIDEWAYS"
-            status_sinyal = "WAIT"
-
-        # Analisis Momentum
-        if last_k > 80: momentum = "🔥 Overbought"
-        elif last_k < 20: momentum = "🧊 Oversold"
-        elif last_k > last_d: momentum = "📈 Bullish"
-        else: momentum = "📉 Bearish"
-            # --- LOGIKA VOLUME TRANSPARAN ---
-        # Mengukur tren volume 5 periode terakhir
-        vol_trend = df['Volume'].rolling(window=5).mean()
-        last_vol = float(df['Volume'].iloc[-1])
-        prev_vol = float(df['Volume'].iloc[-2])
-        
-        # Penentuan Status Volume (Transparan)
-        if last_vol > prev_vol * 1.1:
-            vol_status = "🟢 Naik (Akumulasi)"
-        elif last_vol < prev_vol * 0.9:
-            vol_status = "🔴 Turun (Distribusi)"
-        else:
-            vol_status = "⚪ Datar (Sideways)"
-
-        # Tambahkan di bagian perhitungan indikator
-        # Menghitung Volatilitas (Standard Deviation 20 periode)
-        df['StdDev'] = df['Close'].rolling(window=20).std()
-        # Menghitung Z-Score sederhana untuk evaluasi harga (apakah ekstrem atau tidak)
-        df['Z-Score'] = (df['Close'] - df['Close'].rolling(window=20).mean()) / df['StdDev']
-
-        # Ambil nilai terakhir
-        last_std = float(df['StdDev'].iloc[-1]) if not pd.isna(df['StdDev'].iloc[-1]) else 0
-        last_zscore = float(df['Z-Score'].iloc[-1]) if not pd.isna(df['Z-Score'].iloc[-1]) else 0
-
-        # Evaluasi Risiko
-        if last_zscore > 2:
-            evaluasi = "🔴 Over-extended (Risiko Koreksi)"
-        elif last_zscore < -2:
-            evaluasi = "🟢 Undervalued (Potensi Rebound)"
-        else:
-            evaluasi = "⚪ Normal"
-
         return {
             "Ticker": ticker_name,
             "Price": last_price,
@@ -302,12 +212,7 @@ def analyze_market_momentum(ticker):
             "Est For Buy (B)": round(est_foreign_buy, 2),
             "Est For Sell (S)": round(est_foreign_sell, 2),
             "Net Foreign (B)": round(net_foreign_b, 2),
-            "Net Foreign Avg": round(net_foreign_avg, 2),
-            "Momentum": momentum,
-            "Status Sinyal": status_sinyal,
-            "Volume Now": last_vol,
-            "Volatilitas (StdDev)": round(last_std, 2),
-            "Evaluasi Risiko": evaluasi
+            "Net Foreign Avg": round(net_foreign_avg, 2)
         }
     except:
         return None
@@ -384,30 +289,17 @@ with st.sidebar:
         "Saring Kategori Sinyal:",
         options=["Tampilkan Semua Emiten", "Hanya Sinyal BUY / SUPER BUY", "Hanya Struktur Up-Trend"]
     )
-    only_ready_to_buy = st.checkbox("Hanya Tampilkan Sinyal Siap Beli")
     st.markdown("---")
     saham_pilihan = st.multiselect(
-    "Kustom Pilih / Ketik Kode Saham Tambahan:",
-    options=master_tickers_clean,
-        default=["BOLA","FILM","NIRO","WAPO","CARE","CTTH","PANS","BPII","BUMI","BBCA","BBRI","BBNI","BMRI","TLKM","BDMN","IMJS","IRSX","DSSA"]
-        )
+        "Kustom Pilih / Ketik Kode Saham Tambahan:",
+        options=master_tickers_clean,
+        default=["BOLA","FILM","NIRO","WAPO","CARE","CTTH","PANS","BPII","BUMI","BBCA","BBRI","BBNI","BMRI","TLKM","BDMN","IMJS","IRSX","DSSA"])
 
 # RENDERING TABEL UTAMA & METRIK PERSENTASE DANA
 if len(saham_pilihan) > 0:
     with st.spinner("Sedang memproses bandarmologi dan data bursa..."):
         df_radar = run_mega_scanner(saham_pilihan)
-        
-        if df_radar is not None and not df_radar.empty:
-            if only_ready_to_buy:
-                df_radar = df_radar[df_radar["Actionable"].str.contains("BUY|STRONG UP")]
-            if not df_radar.empty:
-                df_radar = df_radar.sort_values(by="Change %", ascending=False)
-                st.dataframe(df_radar)
-            else:
-                st.warning("Tidak ada emiten yang memenuhi kriteria filter.")
-        else:
-            st.error("Gagal memproses data emiten. Periksa koneksi ke Yahoo Finance.")
-            
+    
     if not df_radar.empty:
         avg_masuk = float(df_radar["Dana Masuk %"].mean())
         avg_keluar = 100.0 - avg_masuk
@@ -440,9 +332,7 @@ if len(saham_pilihan) > 0:
                 idx_potensi = row.index.get_loc('Potensi +/- (%)')
                 idx_prediksi = row.index.get_loc('Prediksi Harga')
                 idx_vwap = row.index.get_loc('VWAP Baseline')
-                idx_eval = row.index.get_loc('Evaluasi Risiko')
-
-                # Styling dasar
+                
                 styles[idx_masuk] = 'color: #4ADE80; font-weight: bold;'
                 styles[idx_keluar] = 'color: #F87171;'
                 
@@ -450,23 +340,14 @@ if len(saham_pilihan) > 0:
                     styles[idx_vwap] = 'color: #4ADE80; font-weight: bold;'
                 else:
                     styles[idx_vwap] = 'color: #F87171; font-weight: bold;'
-                    
-                # Logika Actionable & Trend
+
                 if float(row['Potensi +/- (%)']) > 0:
                     styles[idx_potensi] = 'color: #22C55E; font-weight: bold; background-color: #052E16;'
                     styles[idx_prediksi] = 'color: #4ADE80; font-weight: bold;'
                 elif float(row['Potensi +/- (%)']) < 0:
                     styles[idx_potensi] = 'color: #EF4444; font-weight: bold; background-color: #451A03;'
                     styles[idx_prediksi] = 'color: #F87171; font-weight: bold;'
-
-                # Tambahan styling untuk Evaluasi Risiko
-                idx_eval = row.index.get_loc('Evaluasi Risiko')
-                eval_val = str(row['Evaluasi Risiko'])
-                if "Over-extended" in eval_val:
-                    styles[idx_eval] = 'background-color: #7f1d1d; color: white;'
-                elif "Undervalued" in eval_val:
-                    styles[idx_eval] = 'background-color: #064e3b; color: white;'
-                    
+                
                 if "SUPER BUY" in str(row['Actionable']):
                     styles[idx_action] = 'background-color: #15803D; color: white; font-weight: bold;'
                 elif "BUY" in str(row['Actionable']):
@@ -474,11 +355,9 @@ if len(saham_pilihan) > 0:
                     
                 if "Up-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #4ADE80;'
                 elif "Down-Trend" in str(row['Trend']): styles[idx_trend] = 'color: #F87171;'
-            
-            except: 
-                pass
+            except: pass
             return styles
-            
+
         if not df_radar.empty:
             styled_df = df_radar.style.apply(style_radar_rows, axis=1)\
                                       .format({
@@ -496,9 +375,7 @@ if len(saham_pilihan) > 0:
                                           "Est For Buy (B)": "{:.2f} B",
                                           "Est For Sell (S)": "{:.2f} B",
                                           "Net Foreign (B)": "{:+.2f} B",
-                                          "Net Foreign Avg": "{:.2f} B",
-                                          "Volatilitas (StdDev)": "{:.2f}",
-                                          "Evaluasi Risiko": "{}"
+                                          "Net Foreign Avg": "{:.2f} B"
                                       })
             st.dataframe(styled_df, use_container_width=True, height=520)
         
