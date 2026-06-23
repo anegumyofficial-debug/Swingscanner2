@@ -199,6 +199,8 @@ def analyze_market_momentum(ticker):
             "Nego Price": simulated_nego_price,
             "Potensi +/- (%)": round(potensi_change_pct, 2),
             "Prediksi Harga": prediksi_harga_saham,
+            "Stoch %K": round(last_k, 2),
+            "Stoch %D": round(last_d, 2),
             "RSI": round(last_rsi, 2),
             "Inst Flow": inst_flow,
             "Dana Masuk %": round(p_masuk, 1),
