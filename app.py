@@ -352,7 +352,7 @@ with st.sidebar:
     saham_pilihan = st.multiselect(
         "Kustom Pilih / Ketik Kode Saham Tambahan:",
         options=master_tickers_clean,
-        default=["BUMI","BBCA","BBRI","BBNI","BMRI","TLKM","MDKA","ICBP","BDMN","JSMR","IRSX","DSSA"])
+        default=["DSSA","RBMS","BRMS","ELPI","RGAS","ENRG","MDKA","DEWA","BUMI","CUAN","RMKO","BBCA","BBRI","BBNI","BMRI","CPIN","JPFA","CMRY","ISAT","TLKM","JSMR","WBSA","IRSX","NZIA"])
 
 # RENDERING TABEL UTAMA & METRIK PERSENTASE DANA
 if len(saham_pilihan) > 0:
