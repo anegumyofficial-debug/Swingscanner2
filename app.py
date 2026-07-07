@@ -97,11 +97,11 @@ def analyze_market_momentum(ticker):
         
         # 2. Bersihkan struktur kolom (menangani MultiIndex dari yfinance)
         df = clean_yf_dataframe(df)
-        
+        if total_turnover_b > 0.5:
+
         # 3. Validasi apakah data berhasil dimuat
         if df is None or df.empty or len(df) < 20:
-        if total_turnover_b > 0.5:
-            return None
+                    return None
             
         # 4. Pastikan kolom numerik (kadang yf membawa object)
             for col in ['Close', 'High', 'Low', 'Volume']:
