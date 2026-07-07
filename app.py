@@ -311,24 +311,16 @@ def display_market_summary(df):
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
 
-if not df_radar.empty:
-        # 1. Panggil fungsi summary yang baru dibuat
-        display_market_summary(df_radar)
-        
-        st.markdown("---") # Garis pembatas
-        
-        # 2. Tampilan utama (Tabel Lengkap)
-        st.markdown("### 🔍 Data Lengkap Radar")
-        
-        # ... (Lanjutkan dengan logika filter mode Anda) ...
-        if filter_mode == "Hanya Sinyal BUY / SUPER BUY":
-            df_radar = df_radar[df_radar["Actionable"].str.contains("BUY")]
-        # ... (dan seterusnya) ...
-        
-        # 3. Tampilkan Tabel Radar Utama
-        styled_df = df_radar.style.apply(...) 
-        st.dataframe(styled_df, use_container_width=True, height=520)
+# Tambahkan pengecekan apakah df_radar sudah ada di session_state atau sudah terdefinisi
+if 'df_radar' in locals() and not df_radar.empty:
+    # 1. Panggil fungsi summary
+    display_market_summary(df_radar)
     
+    st.markdown("---")
+    
+    # 2. Tampilan utama
+    st.markdown("### 🔍 Data Lengkap Radar")
+        
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
 tf_col1, tf_col2 = st.columns(2)
