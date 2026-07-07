@@ -305,7 +305,11 @@ def display_market_summary(df):
     with tab4:
         top_sell_asing = df.sort_values(by="Net Foreign (B)", ascending=True).head(10)
         st.dataframe(top_sell_asing[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
-        
+    
+    if not df_radar.empty:
+        # PANGGIL FUNGSI INI AGAR TAB MUNCUL
+        display_market_summary(df_radar)
+    
 # --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
