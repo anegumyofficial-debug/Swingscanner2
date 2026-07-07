@@ -92,7 +92,7 @@ def analyze_market_momentum(ticker):
         formatted_ticker = ticker if ticker.endswith(".JK") else f"{ticker}.JK"
         
         df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
-# 1. Download data langsung
+        # 1. Download data langsung
         df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
         
         # 2. Bersihkan struktur kolom (menangani MultiIndex dari yfinance)
@@ -310,20 +310,6 @@ def display_market_summary(df):
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
 
-# PANEL SIDEBAR (Dipindahkan ke atas agar filter bisa diakses)
-with st.sidebar:
-    st.header("⚙️ Panel Filter Pencarian")
-    filter_mode = st.radio(
-        "Saring Kategori Sinyal:",
-        options=["Tampilkan Semua Emiten", "Hanya Sinyal BUY / SUPER BUY", "Hanya Struktur Up-Trend"]
-    )
-    st.markdown("---")
-    saham_pilihan = st.multiselect(
-        "Kustom Pilih / Ketik Kode Saham:",
-        options=master_tickers_clean,
-        default=["DSSA","EMAS","AMMN","TPIA","RBMS","BRMS","ELPI","RGAS","ENRG","MDKA","DEWA","BUMI","CUAN","RMKO","WBSA","IRSX","NZIA","ANTM","BBCA","BBRI","BBNI","BMRI","CPIN","JPFA","CMRY","ISAT","TLKM","JSMR"]
-    )
-
 # LOGIKA PEMROSESAN DATA
 if len(saham_pilihan) > 0:
     with st.spinner("Sedang memproses bandarmologi dan data bursa..."):
@@ -333,8 +319,7 @@ if len(saham_pilihan) > 0:
         # 1. Tampilkan Tab Summary (Fungsi dipanggil di sini setelah df_radar ada)
         display_market_summary(df_radar)
         
-        st.markdown("---")
-        
+        st.markdown("---")        
         
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
