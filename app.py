@@ -309,18 +309,7 @@ def display_market_summary(df):
 # --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
-
-# LOGIKA PEMROSESAN DATA
-if len(saham_pilihan) > 0:
-    with st.spinner("Sedang memproses bandarmologi dan data bursa..."):
-        df_radar = run_mega_scanner(saham_pilihan)
-        
-    if df_radar is not None and not df_radar.empty:
-        # 1. Tampilkan Tab Summary (Fungsi dipanggil di sini setelah df_radar ada)
-        display_market_summary(df_radar)
-        
-        st.markdown("---")        
-        
+      
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
 tf_col1, tf_col2 = st.columns(2)
