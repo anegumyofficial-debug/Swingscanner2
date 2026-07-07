@@ -100,13 +100,13 @@ def analyze_market_momentum(ticker):
         
         # 3. Validasi apakah data berhasil dimuat
         if df is None or df.empty or len(df) < 20:
-                    return None
+            return None
             
-        # 4. Pastikan kolom numerik (kadang yf membawa object)
-            for col in ['Close', 'High', 'Low', 'Volume']:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-                df = df.dropna()    
-
+        # 4. Pastikan kolom numerik
+        for col in ['Close', 'High', 'Low', 'Volume']:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        df = df.dropna()
+        
         # 5. BARU HITUNG INDIKATOR (RSI, VWAP, STOCH, DLL) SETELAH DF VALID
         df['RSI'] = ta.rsi(df['Close'], length=14)
         
