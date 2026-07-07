@@ -380,7 +380,7 @@ if len(saham_pilihan) > 0:
         df_radar = run_mega_scanner(saham_pilihan)
     if not df_radar.empty:
         # PANGGIL FUNGSI INI DI SINI AGAR TAB MUNCUL
-        display_market_summary(df_radar
+        display_market_summary(df_radar)
                                
     if not df_radar.empty:
         avg_masuk = float(df_radar["Dana Masuk %"].mean())
