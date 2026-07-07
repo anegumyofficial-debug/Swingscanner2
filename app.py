@@ -307,7 +307,6 @@ def display_market_summary(df):
         st.dataframe(top_sell_asing[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
         
 # --- 5. INTERFACE PANEL UTAMA ---
-# --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
 
@@ -336,32 +335,6 @@ if len(saham_pilihan) > 0:
         
         st.markdown("---")
         
-        # 2. Filter data
-        if filter_mode == "Hanya Sinyal BUY / SUPER BUY":
-            df_radar = df_radar[df_radar["Actionable"].str.contains("BUY", na=False)]
-        elif filter_mode == "Hanya Struktur Up-Trend":
-            df_radar = df_radar[df_radar["Trend"].str.contains("Up-Trend", na=False)]
-            
-        # 3. Metrik & Tabel
-        avg_masuk = float(df_radar["Dana Masuk %"].mean())
-        avg_keluar = 100.0 - avg_masuk
-        
-        st.markdown(f"""
-        <div class='card-dana'>
-            <div style='display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px;'>
-                <span style='color: #4ADE80;'>🟢 Rata-rata Dana Masuk: {avg_masuk:.1f}%</span>
-                <span style='color: #F87171;'>🔴 Rata-rata Dana Keluar: {avg_keluar:.1f}%</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.progress(avg_masuk / 100.0)
-        
-        st.markdown("### 🔍 Data Lengkap Radar")
-        st.dataframe(df_radar, use_container_width=True, height=520)
-    else:
-        st.warning("⚠️ Data belum terbentuk. Pastikan koneksi ke Yahoo Finance stabil.")
-else:
-    st.info("👋 Silakan pilih emiten di sidebar untuk memulai.")
         
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
