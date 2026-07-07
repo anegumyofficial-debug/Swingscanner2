@@ -89,7 +89,26 @@ def clean_yf_dataframe(df):
 # --- 4. ENGINE ANALISIS UTAMA ---
 def analyze_market_momentum(ticker):
     try:
+    # Tambahkan ini untuk menampilkan tabel ringkasan
+def display_market_summary(df):
+    st.subheader("📊 Ringkasan Pasar (Top Movers)")
+    col1, col2 = st.columns(2)
+    
+    # Emiten dengan Dana Masuk Terbesar (Simulasi)
+    top_buy = df.sort_values(by="Dana Masuk %", ascending=False).head(5)
+    # Emiten dengan Net Foreign Buy Terbesar (Simulasi)
+    top_foreign = df.sort_values(by="Net Foreign (B)", ascending=False).head(5)
+    
+    with col1:
+        st.write("🔥 Top 5 Dana Masuk (Akumulasi)")
+        st.dataframe(top_buy[["Ticker", "Price", "Dana Masuk %"]], use_container_width=True)
+    
+    with col2:
+        st.write("🚨 Top 5 Net Foreign Buy (Estimasi)")
+        st.dataframe(top_foreign[["Ticker", "Price", "Net Foreign (B)"]], use_container_width=True)
+        
         formatted_ticker = ticker if ticker.endswith(".JK") else f"{ticker}.JK"
+
         
         df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
 # 1. Download data langsung
@@ -278,6 +297,13 @@ def analyze_market_momentum(ticker):
 
 def run_mega_scanner(ticker_list):
     results = []
+    tab1, tab2 = st.tabs(["Radar Utama", "Ringkasan Top Mover"])
+
+with tab1:
+    st.dataframe(styled_df, ...)
+with tab2:
+    display_market_summary(df_radar)
+    
     with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
         future_to_ticker = {executor.submit(analyze_market_momentum, t): t for t in ticker_list}
         for future in concurrent.futures.as_completed(future_to_ticker):
@@ -285,6 +311,7 @@ def run_mega_scanner(ticker_list):
             if res is not None:
                 results.append(res)
     return pd.DataFrame(results)
+
 
 # --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
@@ -379,7 +406,12 @@ if len(saham_pilihan) > 0:
             df_radar = df_radar[df_radar["Trend"].str.contains("Up-Trend")]
             
         df_radar = df_radar.sort_values(by=["Dana Masuk %", "Net Foreign Avg"], ascending=[False, False])
-        
+
+        if not df_radar.empty:
+    # --- Tambahkan ini ---
+    display_market_summary(df_radar)
+    # ---------------------
+    
         # --- FUNGSI STYLE ---
         def style_radar_rows(row):
             styles = [''] * len(row)
