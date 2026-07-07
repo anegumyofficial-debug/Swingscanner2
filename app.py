@@ -307,18 +307,61 @@ def display_market_summary(df):
         st.dataframe(top_sell_asing[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
         
 # --- 5. INTERFACE PANEL UTAMA ---
+# --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
 
-# Tambahkan pengecekan apakah df_radar sudah ada di session_state atau sudah terdefinisi
-if 'df_radar' in locals() and not df_radar.empty:
-    # 1. Panggil fungsi summary
-    display_market_summary(df_radar)
-    
+# PANEL SIDEBAR (Dipindahkan ke atas agar filter bisa diakses)
+with st.sidebar:
+    st.header("⚙️ Panel Filter Pencarian")
+    filter_mode = st.radio(
+        "Saring Kategori Sinyal:",
+        options=["Tampilkan Semua Emiten", "Hanya Sinyal BUY / SUPER BUY", "Hanya Struktur Up-Trend"]
+    )
     st.markdown("---")
-    
-    # 2. Tampilan utama
-    st.markdown("### 🔍 Data Lengkap Radar")
+    saham_pilihan = st.multiselect(
+        "Kustom Pilih / Ketik Kode Saham:",
+        options=master_tickers_clean,
+        default=["DSSA","EMAS","AMMN","TPIA","RBMS","BRMS","ELPI","RGAS","ENRG","MDKA","DEWA","BUMI","CUAN","RMKO","WBSA","IRSX","NZIA","ANTM","BBCA","BBRI","BBNI","BMRI","CPIN","JPFA","CMRY","ISAT","TLKM","JSMR"]
+    )
+
+# LOGIKA PEMROSESAN DATA
+if len(saham_pilihan) > 0:
+    with st.spinner("Sedang memproses bandarmologi dan data bursa..."):
+        df_radar = run_mega_scanner(saham_pilihan)
+        
+    if df_radar is not None and not df_radar.empty:
+        # 1. Tampilkan Tab Summary (Fungsi dipanggil di sini setelah df_radar ada)
+        display_market_summary(df_radar)
+        
+        st.markdown("---")
+        
+        # 2. Filter data
+        if filter_mode == "Hanya Sinyal BUY / SUPER BUY":
+            df_radar = df_radar[df_radar["Actionable"].str.contains("BUY", na=False)]
+        elif filter_mode == "Hanya Struktur Up-Trend":
+            df_radar = df_radar[df_radar["Trend"].str.contains("Up-Trend", na=False)]
+            
+        # 3. Metrik & Tabel
+        avg_masuk = float(df_radar["Dana Masuk %"].mean())
+        avg_keluar = 100.0 - avg_masuk
+        
+        st.markdown(f"""
+        <div class='card-dana'>
+            <div style='display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px;'>
+                <span style='color: #4ADE80;'>🟢 Rata-rata Dana Masuk: {avg_masuk:.1f}%</span>
+                <span style='color: #F87171;'>🔴 Rata-rata Dana Keluar: {avg_keluar:.1f}%</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.progress(avg_masuk / 100.0)
+        
+        st.markdown("### 🔍 Data Lengkap Radar")
+        st.dataframe(df_radar, use_container_width=True, height=520)
+    else:
+        st.warning("⚠️ Data belum terbentuk. Pastikan koneksi ke Yahoo Finance stabil.")
+else:
+    st.info("👋 Silakan pilih emiten di sidebar untuk memulai.")
         
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
