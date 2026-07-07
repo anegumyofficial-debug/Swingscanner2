@@ -100,6 +100,7 @@ def analyze_market_momentum(ticker):
         
         # 3. Validasi apakah data berhasil dimuat
         if df is None or df.empty or len(df) < 20:
+        if total_turnover_b > 0.5:
             return None
             
         # 4. Pastikan kolom numerik (kadang yf membawa object)
@@ -286,27 +287,26 @@ def run_mega_scanner(ticker_list):
                 results.append(res)
     return pd.DataFrame(results)
 
+# --- PENEMPATAN FUNGSI BARU DI SINI ---
 def display_market_summary(df):
-    st.markdown("### 🏆 Analisis Pergerakan Tercepat")
-    # Menggunakan tab untuk memisahkan kategori agar tidak memenuhi layar
-    tab_buy, tab_sell, tab_foreign = st.tabs(["🔥 Top Akumulasi", "🚨 Top Distribusi", "🌏 Foreign Flow"])
+    st.markdown("### 📊 Ringkasan Bandarmologi & Foreign Flow")
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🔥 Top Buy Bandar", "🚨 Top Sell Bandar", "🌏 Top Buy Asing", "📉 Top Sell Asing"
+    ])
     
-    with tab_buy:
-        # Emiten dengan Dana Masuk tertinggi
-        top_buy = df.sort_values(by="Dana Masuk %", ascending=False).head(5)
-        st.dataframe(top_buy[["Ticker", "Price", "Dana Masuk %", "Actionable"]], use_container_width=True)
+    with tab1:
+        top_buy_bandar = df.sort_values(by="Dana Masuk %", ascending=False).head(10)
+        st.dataframe(top_buy_bandar[["Ticker", "Price", "Dana Masuk %", "Inst Flow"]], use_container_width=True)
+    with tab2:
+        top_sell_bandar = df.sort_values(by="Dana Masuk %", ascending=True).head(10)
+        st.dataframe(top_sell_bandar[["Ticker", "Price", "Dana Masuk %", "Inst Flow"]], use_container_width=True)
+    with tab3:
+        top_buy_asing = df.sort_values(by="Net Foreign (B)", ascending=False).head(10)
+        st.dataframe(top_buy_asing[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
+    with tab4:
+        top_sell_asing = df.sort_values(by="Net Foreign (B)", ascending=True).head(10)
+        st.dataframe(top_sell_asing[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
         
-    with tab_sell:
-        # Emiten dengan Dana Keluar tertinggi (Dana Masuk terkecil)
-        top_sell = df.sort_values(by="Dana Masuk %", ascending=True).head(5)
-        st.dataframe(top_sell[["Ticker", "Price", "Dana Masuk %", "Actionable"]], use_container_width=True)
-        
-    with tab_foreign:
-        # Net Foreign terbesar
-        top_foreign = df.sort_values(by="Net Foreign (B)", ascending=False).head(5)
-        st.dataframe(top_foreign[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
-        
-
 # --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
