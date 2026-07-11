@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd
+import pandas as pdM
 import yfinance as yf
 import pandas_ta as ta
 from datetime import datetime
@@ -372,7 +372,7 @@ with st.sidebar:
     saham_pilihan = st.multiselect(
         "Kustom Pilih / Ketik Kode Saham Tambahan:",
         options=master_tickers_clean,
-        default=["OMED","SKBM","ADHI","GGRM","ICBP","INDF","DSSA","EMAS","AMMN","TPIA","RBMS","BRMS","ELPI","RGAS","ENRG","MDKA","DEWA","BUMI","CUAN","RMKO","WBSA","IRSX","NZIA","ANTM","BBCA","BBRI","BBNI","BMRI","CPIN","JPFA","CMRY","ISAT","TLKM","JSMR"])
+        default=["TLKM"])
 
 # RENDERING TABEL UTAMA & METRIK PERSENTASE DANA
 if len(saham_pilihan) > 0:
