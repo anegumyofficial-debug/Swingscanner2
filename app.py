@@ -92,7 +92,7 @@ def analyze_market_momentum(ticker):
         formatted_ticker = ticker if ticker.endswith(".JK") else f"{ticker}.JK"
         
         df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
-        # 1. Download data langsung
+# 1. Download data langsung
         df = yf.download(formatted_ticker, period="3mo", interval="1d", progress=False)
         
         # 2. Bersihkan struktur kolom (menangani MultiIndex dari yfinance)
@@ -102,11 +102,11 @@ def analyze_market_momentum(ticker):
         if df is None or df.empty or len(df) < 20:
             return None
             
-        # 4. Pastikan kolom numerik
-        for col in ['Close', 'High', 'Low', 'Volume']:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-        df = df.dropna()
-        
+        # 4. Pastikan kolom numerik (kadang yf membawa object)
+            for col in ['Close', 'High', 'Low', 'Volume']:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df = df.dropna()    
+
         # 5. BARU HITUNG INDIKATOR (RSI, VWAP, STOCH, DLL) SETELAH DF VALID
         df['RSI'] = ta.rsi(df['Close'], length=14)
         
@@ -286,30 +286,41 @@ def run_mega_scanner(ticker_list):
                 results.append(res)
     return pd.DataFrame(results)
 
-# --- PENEMPATAN FUNGSI BARU DI SINI ---
 def display_market_summary(df):
-    st.markdown("### 📊 Ringkasan Bandarmologi & Foreign Flow")
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "🔥 Top Buy Bandar", "🚨 Top Sell Bandar", "🌏 Top Buy Asing", "📉 Top Sell Asing"
-    ])
+    st.markdown("### 🏆 Analisis Pergerakan Tercepat")
+    # Menggunakan tab untuk memisahkan kategori agar tidak memenuhi layar
+    tab_buy, tab_sell, tab_foreign = st.tabs(["🔥 Top Akumulasi", "🚨 Top Distribusi", "🌏 Foreign Flow"])
     
-    with tab1:
-        top_buy_bandar = df.sort_values(by="Dana Masuk %", ascending=False).head(10)
-        st.dataframe(top_buy_bandar[["Ticker", "Price", "Dana Masuk %", "Inst Flow"]], use_container_width=True)
-    with tab2:
-        top_sell_bandar = df.sort_values(by="Dana Masuk %", ascending=True).head(10)
-        st.dataframe(top_sell_bandar[["Ticker", "Price", "Dana Masuk %", "Inst Flow"]], use_container_width=True)
-    with tab3:
-        top_buy_asing = df.sort_values(by="Net Foreign (B)", ascending=False).head(10)
-        st.dataframe(top_buy_asing[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
-    with tab4:
-        top_sell_asing = df.sort_values(by="Net Foreign (B)", ascending=True).head(10)
-        st.dataframe(top_sell_asing[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
-    
+    with tab_buy:
+        # Emiten dengan Dana Masuk tertinggi
+        top_buy = df.sort_values(by="Dana Masuk %", ascending=False).head(5)
+        st.dataframe(top_buy[["Ticker", "Price", "Dana Masuk %", "Actionable"]], use_container_width=True)
+        
+    with tab_sell:
+        # Emiten dengan Dana Keluar tertinggi (Dana Masuk terkecil)
+        top_sell = df.sort_values(by="Dana Masuk %", ascending=True).head(5)
+        st.dataframe(top_sell[["Ticker", "Price", "Dana Masuk %", "Actionable"]], use_container_width=True)
+        
+    with tab_foreign:
+        # Net Foreign terbesar
+        top_foreign = df.sort_values(by="Net Foreign (B)", ascending=False).head(5)
+        st.dataframe(top_foreign[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
+        
+
 # --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
-      
+
+# Tambahkan pengecekan apakah df_radar sudah ada di session_state atau sudah terdefinisi
+if 'df_radar' in locals() and not df_radar.empty:
+    # 1. Panggil fungsi summary
+    display_market_summary(df_radar)
+    
+    st.markdown("---")
+    
+    # 2. Tampilan utama
+    st.markdown("### 🔍 Data Lengkap Radar")
+        
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
 tf_col1, tf_col2 = st.columns(2)
@@ -372,16 +383,13 @@ with st.sidebar:
     saham_pilihan = st.multiselect(
         "Kustom Pilih / Ketik Kode Saham Tambahan:",
         options=master_tickers_clean,
-        default=["TLKM"])
+        default=["DSSA","EMAS","AMMN","TPIA","RBMS","BRMS","ELPI","RGAS","ENRG","MDKA","DEWA","BUMI","CUAN","RMKO","WBSA","IRSX","NZIA","ANTM","BBCA","BBRI","BBNI","BMRI","CPIN","JPFA","CMRY","ISAT","TLKM","JSMR"])
 
 # RENDERING TABEL UTAMA & METRIK PERSENTASE DANA
 if len(saham_pilihan) > 0:
     with st.spinner("Sedang memproses bandarmologi dan data bursa..."):
         df_radar = run_mega_scanner(saham_pilihan)
-    if not df_radar.empty:
-        # PANGGIL FUNGSI INI DI SINI AGAR TAB MUNCUL
-        display_market_summary(df_radar)
-                               
+    
     if not df_radar.empty:
         avg_masuk = float(df_radar["Dana Masuk %"].mean())
         avg_keluar = 100.0 - avg_masuk
