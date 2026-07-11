@@ -286,41 +286,10 @@ def run_mega_scanner(ticker_list):
                 results.append(res)
     return pd.DataFrame(results)
 
-def display_market_summary(df):
-    st.markdown("### 🏆 Analisis Pergerakan Tercepat")
-    # Menggunakan tab untuk memisahkan kategori agar tidak memenuhi layar
-    tab_buy, tab_sell, tab_foreign = st.tabs(["🔥 Top Akumulasi", "🚨 Top Distribusi", "🌏 Foreign Flow"])
-    
-    with tab_buy:
-        # Emiten dengan Dana Masuk tertinggi
-        top_buy = df.sort_values(by="Dana Masuk %", ascending=False).head(5)
-        st.dataframe(top_buy[["Ticker", "Price", "Dana Masuk %", "Actionable"]], use_container_width=True)
-        
-    with tab_sell:
-        # Emiten dengan Dana Keluar tertinggi (Dana Masuk terkecil)
-        top_sell = df.sort_values(by="Dana Masuk %", ascending=True).head(5)
-        st.dataframe(top_sell[["Ticker", "Price", "Dana Masuk %", "Actionable"]], use_container_width=True)
-        
-    with tab_foreign:
-        # Net Foreign terbesar
-        top_foreign = df.sort_values(by="Net Foreign (B)", ascending=False).head(5)
-        st.dataframe(top_foreign[["Ticker", "Price", "Net Foreign (B)", "Inst Flow"]], use_container_width=True)
-        
-
 # --- 5. INTERFACE PANEL UTAMA ---
 st.markdown("<h1 class='main-title'>📈 Swing Trading & Scalper Radar Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>Sistem pemindaian otomatis berskala 300+ Emiten Bursa Efek Indonesia</p>", unsafe_allow_html=True)
 
-# Tambahkan pengecekan apakah df_radar sudah ada di session_state atau sudah terdefinisi
-if 'df_radar' in locals() and not df_radar.empty:
-    # 1. Panggil fungsi summary
-    display_market_summary(df_radar)
-    
-    st.markdown("---")
-    
-    # 2. Tampilan utama
-    st.markdown("### 🔍 Data Lengkap Radar")
-        
 # ----------------- TRACKER MULTI-TIMEFRAME CHART IHSG -----------------
 st.markdown("<div class='card-ihsg'>", unsafe_allow_html=True)
 tf_col1, tf_col2 = st.columns(2)
