@@ -70,7 +70,7 @@ def load_mega_market_tickers():
         "TPIA", "TPMA", "TRAM", "TRIL", "TRIM", "TRIN", "TRIS", "TRJA", "TRJU", "TRST", "TRUE", "TRUK", "TSPC", "TUGU", "TURN", 
         "TYRE", "UCID", "UDNG", "UFOE", "UNGO", "UNIT", "UNTR", "UNVR", "URBN", "UTAA", "VINS", "VIVA", "VIVM", "VKTR", "VOKS", 
         "VONE", "VPAC", "WAPO", "WEGE", "WEHA", "WICO", "WIFI", "WIIM", "WIKA", "WINS", "WIRG", "WITA", "WMUU", "WOOD", "WOWS", 
-        "WSBP", "WSKT", "WTG",  "WTIA", "YPAS", "YUASA", "YULE", "ZATA", "ZBRA", "ZINC", "ZONE", "PTRO", "BRAM", "IRSX", "WIFI","RANS","PDRL","JELI","EMMI","KOKO","MIKA","UVCR","BMHS","RGAS","EMAS","WBSA","KLBV","NCKL","BELI","ULTJ","TMPO", "DSSA","RMKO","RMKE","ELPI","OMED"
+        "WSBP", "WSKT", "WTG",  "WTIA", "YPAS", "YUASA", "YULE", "ZATA", "ZBRA", "ZINC", "ZONE", "PTRO", "BRAM", "IRSX", "WIFI","BNBR","RANS","PDRL","JELI","EMMI","KOKO","MIKA","UVCR","BMHS","RGAS","EMAS","WBSA","KLBV","NCKL","BELI","ULTJ","TMPO", "DSSA","RMKO","RMKE","ELPI","OMED"
     ]
     return sorted(list(set([f"{t.strip().upper()}.JK" for t in saham_300_plus])))
 
@@ -372,7 +372,7 @@ with st.sidebar:
     saham_pilihan = st.multiselect(
         "Kustom Pilih / Ketik Kode Saham Tambahan:",
         options=master_tickers_clean,
-        default=["FORU","RANS","PDRL","JELI","EMMI","KOKO","MIKA","AKRA","UVCR","BMHS","COCO","OMED","SKBM","ADHI","GGRM","ICBP","INDF","DSSA","EMAS","AMMN","TPIA","RBMS","BRMS","ELPI","RGAS","ENRG","MDKA","DEWA","BUMI","CUAN","RMKO","WBSA","IRSX","NZIA","ANTM","BBCA","BBRI","BBNI","BMRI","CPIN","JPFA","CMRY","ISAT","TLKM","JSMR"])
+        default=["BNBR","KLBV","FORU","RANS","PDRL","JELI","EMMI","KOKO","MIKA","AKRA","UVCR","BMHS","COCO","OMED","SKBM","ADHI","GGRM","ICBP","INDF","DSSA","EMAS","AMMN","TPIA","RBMS","BRMS","ELPI","RGAS","ENRG","MDKA","DEWA","BUMI","CUAN","RMKO","WBSA","IRSX","NZIA","ANTM","BBCA","BBRI","BBNI","BMRI","CPIN","JPFA","CMRY","ISAT","TLKM","JSMR"])
 
 # RENDERING TABEL UTAMA & METRIK PERSENTASE DANA
 if len(saham_pilihan) > 0:
